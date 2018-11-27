@@ -22,7 +22,11 @@ participants = [participant1, participant2, participant3]
 
 topic = Topic("test", 3, 2)
 result_tree = test_lkh.setup_tree_with_participants(topic, participants)
-print(RenderTree(result_tree))
+#result_tree = test_lkh.setup_tree_with_participants(topic)
+
+#print(RenderTree(result_tree))
+
+
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)
 # print(findall_by_attr(result_tree, "001")[0].name)
@@ -34,10 +38,25 @@ print(RenderTree(result_tree))
 # node2 = Node("2", parent=node)
 # node3 = Node("3", parent=node2)
 # node4 = Node("4", parent=node3)
-# node.is_leaf
-# print(node.ancestors)
+# # node.is_leaf
+# print(node.children)
+# res = test_lkh.get_ancestors_all_participants(topic)
+# print(findall_by_attr(result_tree, "empty"))
+# print(res[1])
+# print(res[0])
 
-res = test_lkh.get_ancestors_all_participants(topic)
-print(res[1])
-print(res[0])
+empty_node = findall_by_attr(result_tree, "empty")[0]
+ancestor_list = empty_node.ancestors
+print(len(ancestor_list))
+for ancestor in ancestor_list:
+    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
 
+participant4 = Participant("12345", "004")
+added_value = test_lkh.add_participant(topic,participant4)
+
+print(RenderTree(added_value[0]))
+
+for ancestor in added_value[1].ancestors:
+    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+
+print(added_value[2])

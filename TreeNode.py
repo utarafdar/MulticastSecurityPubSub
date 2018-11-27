@@ -10,6 +10,9 @@ class TreeNode:
         self.node_id = node_id
         self.node_key = generate_key()
 
+    def reset_key(self):
+        self.node_key = generate_key()
+
 
 class LeafNode(TreeNode):
     def __init__(self, node_id, participant):

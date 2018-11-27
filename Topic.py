@@ -5,7 +5,7 @@ from TreeNode import TreeNode
 
 class Topic:
 
-    def __init__(self, topic_name, depth, no_of_children):
+    def __init__(self, topic_name, depth=None, no_of_children=None):
         self.topicName = topic_name
         root_node = TreeNode('0')
         self.root_tree = Node(topic_name, tree_node=root_node)

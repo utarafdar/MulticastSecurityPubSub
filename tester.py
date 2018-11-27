@@ -38,6 +38,6 @@ print(RenderTree(result_tree))
 # print(node.ancestors)
 
 res = test_lkh.get_ancestors_all_participants(topic)
-print(res[0])
 print(res[1])
+print(res[0])
 

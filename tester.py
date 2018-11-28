@@ -1,6 +1,7 @@
 from LKH_Protocol import LKH
 from Participant import Participant
 from Topic import Topic
+from anytree.exporter import JsonExporter
 from TreeNode import TreeNode
 from anytree import Node, RenderTree, findall_by_attr, findall, Resolver
 
@@ -23,8 +24,7 @@ participants = [participant1, participant2, participant3]
 topic = Topic("test", 3, 2)
 result_tree = test_lkh.setup_tree_with_participants(topic, participants)
 #result_tree = test_lkh.setup_tree_with_participants(topic)
-
-#print(RenderTree(result_tree))
+print(RenderTree(result_tree))
 
 
 #
@@ -45,27 +45,32 @@ result_tree = test_lkh.setup_tree_with_participants(topic, participants)
 # print(res[1])
 # print(res[0])
 
-empty_node = findall_by_attr(result_tree, "empty")[0]
-ancestor_list = empty_node.ancestors
-print(len(ancestor_list))
-for ancestor in ancestor_list:
-    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+# empty_node = findall_by_attr(result_tree, "empty")[0]
+# ancestor_list = empty_node.ancestors
+# print(len(ancestor_list))
+# for ancestor in ancestor_list:
+#     print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+#
+# participant4 = Participant("12345", "004")
+# added_value = test_lkh.add_participant(topic,participant4)
+#
+# print(RenderTree(added_value[0]))
+#
+# for ancestor in added_value[1].ancestors:
+#     print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+#
+# print(added_value[2])
+#
+# res = test_lkh.delete_participant(topic, participant4)
+# print(RenderTree(res[0]))
+#
+# for ancestor in res[1].ancestors:
+#     print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+# print(res[2])
+#
+# print(participant2.get_message_names_topic(topic))
+#
+# exporter = JsonExporter(indent=2, sort_keys=True)
+# print(exporter.export(res))
 
-participant4 = Participant("12345", "004")
-added_value = test_lkh.add_participant(topic,participant4)
-
-print(RenderTree(added_value[0]))
-
-for ancestor in added_value[1].ancestors:
-    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
-
-print(added_value[2])
-
-res = test_lkh.delete_participant(topic, participant4)
-print(RenderTree(res[0]))
-
-for ancestor in res[1].ancestors:
-    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
-print(res[2])
-
-print(participant2.get_message_names_topic(topic))
+print(test_lkh.convert_tree_to_json(topic))

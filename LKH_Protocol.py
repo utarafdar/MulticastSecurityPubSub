@@ -165,6 +165,52 @@ class LKH:
 
         return topic.root_tree, new_empty_node, message_details_dict_list
 
+    @staticmethod
+    def convert_tree_to_json(self, topic):
+        root_node = topic.root_tree
+        json_string = {}
+        json_string["topic"] = topic.topicName
+        json_string["topic_depth"] = topic.depth
+        json_string["topic_no_of_children"] = topic.no_of_children
+        # copy all important tree details in a dictionary format
+        # convert it to Json object, this can be used to persist
+
+        # loop through the tree and collect data
+        node_details_list = []
+        for node in PreOrderIter(root_node):
+            node_details ={}
+            if node.parent is None:
+                node_details ["parent"] = None
+            else:
+                node_details["parent"] = node.parent.tree_node.node_id
+            if hasattr(node, "leaf_node"):
+                node_details["node_id"] = node.leaf_node.node_id
+                node_details["node_key"] = node.leaf_node.node_key
+                node_details["leaf_node"] = "true"
+                if node.leaf_node.participant is None:
+                    node_details["participant"] = None
+                else:
+                    participant = {"participant_id": node.leaf_node.participant.participant_id,
+                                   "pairwise_key": node.leaf_node.participant.pairwise_key}
+                    participant_copy = participant.copy()
+                    node_details["participant"] = participant_copy
+                    participant.clear()
+            else:
+                node_details["node_id"] = node.tree_node.node_id
+                node_details["node_key"] = node.tree_node.node_key
+                node_details["leaf_node"] = "false"
+                node_details["participant"] = None
+            node_details_copy = node_details.copy()
+            node_details_list.append(node_details_copy)
+            node_details.clear()
+        json_string["node_details"] = node_details_list
+        return json_string
+
+    @staticmethod
+    def tree_from_json(self):
+        # write code to construct a tree from json data
+        pass
+
 
 
 

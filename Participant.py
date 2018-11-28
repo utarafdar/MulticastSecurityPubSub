@@ -26,3 +26,7 @@ class Participant:
                 ancestors[ancestor].tree_node.node_id)
             message_names_to_sub.append(message_name)
         return message_names_to_sub
+
+    def get_ancestor_list(self, topic):
+        participant_node = findall_by_attr(topic.root_tree, str(self.participant_id))[0]
+        return participant_node.ancestors

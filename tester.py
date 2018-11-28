@@ -67,3 +67,5 @@ print(RenderTree(res[0]))
 for ancestor in res[1].ancestors:
     print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
 print(res[2])
+
+print(participant2.get_message_names_topic(topic))

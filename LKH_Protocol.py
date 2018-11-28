@@ -52,7 +52,7 @@ class LKH:
                 else:
                     break
         for p in range(participant_count, len(leaf_nodes)):
-            Node("empty", parent=leaf_nodes[p].parent, leaf_node=leaf_nodes[p].tree_node)
+            Node("empty", parent=leaf_nodes[p].parent, leaf_node=LeafNode(leaf_nodes[p].tree_node.node_id))
             leaf_nodes[p].parent = None
             leaf_nodes[p].tree_node = None
             # leaf_node = leaf[0].tree_node
@@ -94,11 +94,11 @@ class LKH:
 
         # find ancestors of the added participant and change their keys
         ancestor_list = added_participant.ancestors
-        message_details_dict_list = []
         for ancestor in ancestor_list:
             ancestor.tree_node.reset_key()
         # code to add details about the messages to be sent
         # first construct messages for participant and its siblings
+        message_details_dict_list = []
         message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
                           "encryption_key": added_participant.leaf_node.participant.pairwise_key,
                           "changed_parent_key": added_participant.parent.tree_node.node_key}
@@ -122,6 +122,48 @@ class LKH:
 
         return topic.root_tree, added_participant, message_details_dict_list
 
+    @staticmethod
+    def delete_participant(topic, participant):
+        # find the node
+        participant_to_be_removed = findall_by_attr(topic.root_tree, participant.participant_id)[0]
+
+        # find all ancestors of this participant and change keys
+        ancestor_list = participant_to_be_removed.ancestors
+        for ancestor in ancestor_list:
+            ancestor.tree_node.reset_key()
+
+        # code to add details about the messages to be sent
+        # first construct messages for to-be-deleted participant's siblings
+        message_details_dict_list = []
+        siblings = participant_to_be_removed.siblings
+        for sibling in siblings:
+            message_detail = {
+                "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                "encryption_key": sibling.leaf_node.participant.pairwise_key,
+                "changed_parent_key": sibling.parent.tree_node.node_key}
+            message_details_dict_list.append(message_detail)
+        # construct messages for ancestors and their siblings
+        for ancestor in range(len(ancestor_list) - 2, -1, -1):
+            children = ancestor_list[ancestor].children
+            for child in children:
+                message_detail = {
+                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
+                    "encryption_key": child.tree_node.node_key,
+                    "changed_parent_key": child.parent.tree_node.node_key}
+                message_details_dict_list.append(message_detail)
+
+        # delete the participant and add empty node there
+        participant.delete_topic(topic)
+
+        new_leaf_node = LeafNode(participant_to_be_removed.leaf_node.node_id)
+        new_leaf_node.participant = None
+        new_empty_node = Node("empty", parent=participant_to_be_removed.parent, leaf_node=new_leaf_node)
+
+        # dis-allocate the participant node after attaching the new empty node to the tree
+        participant_to_be_removed.parent = None
+        participant_to_be_removed.leaf_node = None
+
+        return topic.root_tree, new_empty_node, message_details_dict_list
 
 
 

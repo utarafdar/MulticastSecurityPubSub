@@ -60,3 +60,10 @@ for ancestor in added_value[1].ancestors:
     print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
 
 print(added_value[2])
+
+res = test_lkh.delete_participant(topic, participant4)
+print(RenderTree(res[0]))
+
+for ancestor in res[1].ancestors:
+    print(ancestor.tree_node.node_id, ":", ancestor.tree_node.node_key)
+print(res[2])

@@ -15,7 +15,7 @@ class TreeNode:
 
 
 class LeafNode(TreeNode):
-    def __init__(self, node_id, participant):
+    def __init__(self, node_id, participant=None):
         super().__init__(node_id)
         self.participant = participant
 

@@ -7,3 +7,7 @@ class Participant:
     def add_topic(self, topic):
         # need to include logic for tree arrays
         self.topics.append(topic)
+
+    def delete_topic(self, topic):
+        # need to include logic for tree arrays
+        self.topics.remove(topic)

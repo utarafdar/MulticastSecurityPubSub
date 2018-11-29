@@ -5,9 +5,10 @@ from TreeNode import TreeNode
 
 class Topic:
 
-    def __init__(self, topic_name, depth=None, no_of_children=None):
+    def __init__(self, topic_name, depth=None, no_of_children=None, root_node=None):
         self.topicName = topic_name
-        root_node = TreeNode('0')
+        if root_node is None:
+            root_node = TreeNode('0')
         self.root_tree = Node(topic_name, tree_node=root_node)
         self.depth = depth
         self.no_of_children = no_of_children

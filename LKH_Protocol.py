@@ -1,6 +1,7 @@
 from TreeNode import TreeNode, LeafNode
 from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
+from Topic import Topic
 
 
 def generate_key():
@@ -24,7 +25,7 @@ class LKH:
             current_parents = list(temp_parent)
             temp_parent.clear()
 
-        return topic.root_tree, current_parents
+        return topic.root_tree, current_parents, node_count
 
     @staticmethod
     def setup_tree_with_participants(topic, participants=None):
@@ -36,7 +37,7 @@ class LKH:
         leaf_nodes = tree[1]
         parent_node = tree[0]
         participant_count = 0
-        node_id = topic.no_of_children ** (topic.depth - 1)
+        node_id = tree[2]
         for leaf in leaf_nodes:
             if not (participants is None):
                 if participant_count < len(participants):
@@ -166,12 +167,12 @@ class LKH:
         return topic.root_tree, new_empty_node, message_details_dict_list
 
     @staticmethod
-    def convert_tree_to_json(self, topic):
+    def convert_tree_to_json(topic):
         root_node = topic.root_tree
         json_string = {}
         json_string["topic"] = topic.topicName
-        json_string["topic_depth"] = topic.depth
-        json_string["topic_no_of_children"] = topic.no_of_children
+        json_string["tree_depth"] = topic.depth
+        json_string["tree_no_of_children"] = topic.no_of_children
         # copy all important tree details in a dictionary format
         # convert it to Json object, this can be used to persist
 
@@ -207,11 +208,44 @@ class LKH:
         return json_string
 
     @staticmethod
-    def tree_from_json(self):
+    def tree_from_json(json_tree):
         # write code to construct a tree from json data
-        pass
+        # create topic
+        topic = None
+        # first loop create all nodes and map ids to nodes
+        id_to_node = {}
+        for node in json_tree["node_details"]:
+            if node["leaf_node"] == "false":
+                if node["parent"] is None:
+                    tree_node = TreeNode(node["node_id"])
+                    children_tree_node = Node(json_tree["topic"], tree_node=tree_node)
+                    id_to_node[node["node_id"]] = children_tree_node
+                else:
+                    tree_node = TreeNode(node["node_id"])
+                    children_tree_node = Node(node["node_id"], tree_node=tree_node)
+                    id_to_node[node["node_id"]] = children_tree_node
+            else:
+                if node["participant"] is None:
+                    leaf_node = LeafNode(node["node_id"])
+                    children_tree_node = Node("empty", leaf_node=leaf_node)
+                    id_to_node[node["node_id"]] = children_tree_node
+                else:
+                    participant = Participant(node["participant"]["pairwise_key"], node["participant"]["participant_id"])
+                    leaf_node = LeafNode(node["node_id"], participant=participant)
+                    children_tree_node = Node(participant.participant_id, leaf_node=leaf_node)
+                    id_to_node[node["node_id"]] = children_tree_node
+                    participant.add_topic(json_tree["topic"])
+        parent_node = None
+        for node in json_tree["node_details"]:
+            if node["parent"] is None:
+                id_to_node[node["node_id"]].parent = None
+                parent_node = id_to_node[node["node_id"]]
+                topic = Topic(json_tree["topic"], json_tree["tree_depth"], json_tree["tree_no_of_children"],
+                              root_node=parent_node)
+            else:
+                id_to_node[node["node_id"]].parent = id_to_node[node["parent"]]
 
-
+        return parent_node, id_to_node
 
 
 

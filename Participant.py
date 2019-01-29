@@ -1,18 +1,23 @@
 from anytree import findall_by_attr
+
+
 class Participant:
     def __init__(self, pairwise_key, participant_id):
         self.pairwise_key = pairwise_key
         self.participant_id = participant_id
         self.topics = []
+        self.topic_id_user_permissions_dict = {}
 
-    def add_topic(self, topic):
+    def add_topic(self, topic, participant_permissions):
         # need to include logic for tree arrays
         # also add message names to subscribe in case of participant leave/join
         self.topics.append(topic)
+        self.topic_id_user_permissions_dict.update({topic.id:participant_permissions})
 
     def delete_topic(self, topic):
         # need to include logic for tree arrays
         self.topics.remove(topic)
+        del self.topic_id_user_permissions_dict[topic.id]
 
     def get_message_names_topic(self, topic):
         message_names_to_sub = []

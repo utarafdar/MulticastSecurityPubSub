@@ -2,6 +2,7 @@ from TreeNode import TreeNode, LeafNode
 from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
+from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 
 
 def generate_key():
@@ -29,6 +30,23 @@ class LKH:
 
     @staticmethod
     def setup_tree_with_participants(topic, participants=None):
+        # check for type of publish subscribe group  and proceed further
+        if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
+            # call functions here
+            pass
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
+            pass
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
+            pass
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB:
+            pass
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB:
+            pass
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
+            pass
+        else
+            pass #return error
+
         # height and depth not fitting number of a participants
         if not (participants is None):
             if len(participants) > topic.no_of_children**(topic.depth-1):

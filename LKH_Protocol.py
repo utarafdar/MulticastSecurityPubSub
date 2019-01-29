@@ -33,6 +33,7 @@ class LKH:
         # check for type of publish subscribe group  and proceed further
         if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
             # call functions here
+
             pass
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
             pass
@@ -44,7 +45,7 @@ class LKH:
             pass
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
             pass
-        else
+        else:
             pass #return error
 
         # height and depth not fitting number of a participants

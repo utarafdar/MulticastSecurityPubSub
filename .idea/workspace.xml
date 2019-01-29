@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bab1eb7c-613a-4c78-a9b7-be65e02b7e7c" name="Default Changelist" comment="new pycharm version">
-      <change afterPath="$PROJECT_DIR$/CustomEnums.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LKH_Protocol.py" beforeDir="false" afterPath="$PROJECT_DIR$/LKH_Protocol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Participant.py" beforeDir="false" afterPath="$PROJECT_DIR$/Participant.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Topic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Topic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/subSimple.py" beforeDir="false" afterPath="$PROJECT_DIR$/subSimple.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/LKH_Protocol.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="307">
-              <caret line="47" column="30" selection-start-line="47" selection-start-column="30" selection-end-line="47" selection-end-column="30" />
+            <state relative-caret-position="147">
+              <caret line="47" column="13" selection-start-line="47" selection-start-column="13" selection-end-line="47" selection-end-column="13" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -458,8 +453,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/LKH_Protocol.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="47" column="30" selection-start-line="47" selection-start-column="30" selection-end-line="47" selection-end-column="30" />
+        <state relative-caret-position="147">
+          <caret line="47" column="13" selection-start-line="47" selection-start-column="13" selection-end-line="47" selection-end-column="13" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

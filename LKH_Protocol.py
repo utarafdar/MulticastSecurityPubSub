@@ -130,6 +130,7 @@ class LKH:
             topic_root_node_publishers.set_node_keys(group_key_publishers)
             topic.set_root_tree_publishers(topic_root_node_publishers)
             # call function here to generate trees with keys
+            # test comment
 
             for key in pub_sub_tree['subscriber_tree']:
                 if key == 'publisher_public_key':

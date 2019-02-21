@@ -3,6 +3,7 @@ from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
+from PublishSubscribeTreeKeys import PublishSubscribeTreeKeys
 
 # todo -- figure out what data needs to be persisted and how
 
@@ -36,18 +37,60 @@ class LKH:
         if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
             # call functions here
             # set publisher, subscriber and common trees based on the group
+            LKH.__setup_pub_sub_group_trees(topic, participants, common_tree=True)
 
-            pass
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
-            pass
+            pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=False)
+            sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
-            pass
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB:
-            pass
+            pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
+                                                     publisher_private_key=True, subscriber_public_key=False,
+                                                     subscriber_private_key=False)
+            sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
+                                                     publisher_private_key=False, subscriber_public_key=False,
+                                                     subscriber_private_key=False)
+            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB \
+                or topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB:
+            pub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
+                                                     publisher_private_key=True, subscriber_public_key=True,
+                                                     subscriber_private_key=False)
+            sub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB:
-            pass
+            # todo -- check this again
+            pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=False)
+            sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
-            pass
+            pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
+                                                     publisher_private_key=True, subscriber_public_key=False,
+                                                     subscriber_private_key=False)
+            sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
+                                                     publisher_private_key=False, subscriber_public_key=True,
+                                                     subscriber_private_key=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+
         else:
             pass  # return error
 
@@ -95,12 +138,18 @@ class LKH:
     # In this method trees are created based on the type publisher-
     # -subscriber group
     @staticmethod
-    def __setup_pub_sub_group_trees(self, topic, participants=None, pub_tree=None, sub_tree= None, common_tree=None):
+    def __setup_pub_sub_group_trees(topic, participants=None, pub_tree=None, sub_tree=None, common_tree=None,
+                                    pub_tree_keys=None, sub_tree_keys=None):
         # how to get permissions of individual participant?-receive a map of participant and permissions.
         # set keys in the tree node object
         # not sure below 2 needed yet
-        group_key_publishers = {} # can test for None instead here (quick check)
-        group_key_subscribers = {}
+        group_key_common = None
+        group_key_publishers = None  # can test for None instead here (quick check)
+        group_key_subscribers = None
+        publisher_public_key = None
+        publisher_private_key = None
+        subscriber_public_key = None
+        subscriber_private_key = None
         if pub_tree is None and sub_tree is None and common_tree is None:
             return "error message"
 
@@ -111,21 +160,58 @@ class LKH:
             topic.set_root_tree_common(topic_root_node_common)
             # call function next - not here, recheck
 
+        # generate all the keys
+        if pub_tree is True and sub_tree is True:
+            # checking only public key will suffice, because if there is a public key, there will definitely be a
+            # private key
+            if pub_tree_keys.publisher_public_key is True:
+                # generate public and private keys
+                # todo -- find an appropriate method to generate ECC public and private keys
+                publisher_public_key = generate_key()
+                publisher_private_key = generate_key()
+
+            if pub_tree_keys.subscriber_public_key is True:
+                # generate public private keys
+                subscriber_public_key = generate_key()
+                subscriber_private_key = generate_key()
+
         if not (pub_tree is None):
             topic_root_node_publishers = TreeNode('0', root_node=True)
-            publisher_public_key = generate_key()  # this method needs to be described
-            publisher_private_key = generate_key()
-            group_key_publishers['publisher_public_key'] = publisher_public_key
-            group_key_publishers['publisher_private_key'] = publisher_private_key
+            if pub_tree_keys.publisher_public_key is True:
+                group_key_publishers['publisher_public_key'] = publisher_public_key
+
+            if pub_tree_keys.publisher_private_key is True:
+                group_key_publishers['publisher_private_key'] = publisher_private_key
+
+            if pub_tree_keys.subscriber_public_key is True:
+                group_key_subscribers['subscriber_public_key'] = subscriber_public_key
+
+            if pub_tree_keys.subscriber_private_key is True:
+                group_key_subscribers['subscriber_private_key'] = subscriber_private_key
+
+            if pub_tree_keys.common_key is True:
+                group_key_subscribers['common_group_key'] = group_key_common
+
             topic_root_node_publishers.set_node_publisher_keys(group_key_publishers)
             topic.set_root_tree_publishers(topic_root_node_publishers)  # also try to set the depth and no. children
 
         if not (sub_tree is None):
             topic_root_node_subscribers = TreeNode('0', root_node=True)
-            subscriber_public_key = generate_key()
-            subscriber_private_key = generate_key()
-            group_key_subscribers['subscriber_public_key'] = subscriber_public_key
-            group_key_subscribers['subscriber_private_key'] = subscriber_private_key
+            if sub_tree_keys.publisher_public_key is True:
+                group_key_subscribers['publisher_public_key'] = publisher_public_key
+
+            if sub_tree_keys.publisher_private_key is True:
+                group_key_subscribers['publisher_private_key'] = publisher_private_key
+
+            if sub_tree_keys.subscriber_public_key is True:
+                group_key_subscribers['subscriber_public_key'] = subscriber_public_key
+
+            if sub_tree_keys.subscriber_private_key is True:
+                group_key_subscribers['subscriber_private_key'] = subscriber_private_key
+
+            if sub_tree_keys.common_key is True:
+                group_key_subscribers['common_group_key'] = group_key_common
+
             topic_root_node_subscribers.set_node_subscriber_keys(group_key_subscribers)
             topic.set_root_tree_subscribers(topic_root_node_subscribers)
 

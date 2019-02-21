@@ -3,8 +3,10 @@ import uuid
 from TreeNode import TreeNode
 from CustomEnums import TypeOfPubSubGroupEnum
 
+
 class Topic:
 
+    # todo -- switch depth and number of children to tree class, makes more sense there
     def __init__(self, topic_name, depth=None, no_of_children=None, root_node=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
         self.topicName = topic_name
         if root_node is None:
@@ -18,15 +20,28 @@ class Topic:
         self.root_tree_common = None
         self.root_tree_publishers = None
         self.root_tree_subscribers = None
+        # a way to set no of children and depth for individual groups
+        self.no_of_children_common_tree = None
+        self.depth_common_tree = None
+        self.no_of_children_publisher_tree = None
+        self.depth_publisher_tree = None
+        self.no_of_children_subscriber_tree = None
+        self.depth_subscriber_tree = None
 
-    def set_root_tree_common(self, root_node_common):
+    def set_root_tree_common(self, root_node_common, no_of_children_common_tree=None, depth_common_tree=None):
         self.root_tree_common = root_node_common
+        self.no_of_children_common_tree = no_of_children_common_tree
+        self.depth_common_tree = depth_common_tree
 
-    def set_root_tree_publishers(self, root_node_publishers):
+    def set_root_tree_publishers(self, root_node_publishers, no_of_children_publisher_tree=None, depth_publisher_tree=None):
         self.root_tree_publishers = root_node_publishers
+        self.no_of_children_publisher_tree = no_of_children_publisher_tree
+        self.depth_publisher_tree = depth_publisher_tree
 
-    def set_root_tree_subscribers(self, root_node_subscribers):
+    def set_root_tree_subscribers(self, root_node_subscribers, no_of_children_subscriber_tree=None, depth_subscriber_tree=None):
         self.root_tree_publishers = root_node_subscribers
+        self.no_of_children_subscriber_tree = no_of_children_subscriber_tree
+        self.depth_subscriber_tree = depth_subscriber_tree
     # @property
     # def email(self):
     #     return '{}.{}@email.com'.format(self.first, self.last)

@@ -4,6 +4,7 @@ from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 
+# todo -- figure out what data needs to be persisted and how
 
 def generate_key():
     return 10
@@ -12,6 +13,7 @@ def generate_key():
 class LKH:
     @staticmethod
     def __setup_tree_no_participants(topic):
+        # todo -- check how to pass depth and no of children automatically and by arguments
         node_count = 1
         current_parents = [topic.root_tree]
         temp_parent = []
@@ -33,6 +35,7 @@ class LKH:
         # check for type of publish subscribe group  and proceed further
         if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
             # call functions here
+            # set publisher, subscriber and common trees based on the group
 
             pass
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
@@ -92,21 +95,42 @@ class LKH:
     # In this method trees are created based on the type publisher-
     # -subscriber group
     @staticmethod
-    def __setup_pub_sub_group_trees(self, topic, participants=None, pub_sub_tree=None, common_tree=None):
-        group_key_common = {}
-        group_key_publishers = {}
+    def __setup_pub_sub_group_trees(self, topic, participants=None, pub_tree=None, sub_tree= None, common_tree=None):
+        # how to get permissions of individual participant?-receive a map of participant and permissions.
+        # set keys in the tree node object
+        # not sure below 2 needed yet
+        group_key_publishers = {} # can test for None instead here (quick check)
         group_key_subscribers = {}
-        if pub_sub_tree is None and common_tree is None:
+        if pub_tree is None and sub_tree is None and common_tree is None:
             return "error message"
-        if not (pub_sub_tree is None) and not (common_tree is None):
-            return "error message"
+
         if common_tree is True:
             topic_root_node_common = TreeNode('0', root_node=True)
-            group_key_common['common_group_key'] = generate_key()
-            topic_root_node_common.set_node_keys(group_key_common)
+            group_key_common = generate_key()
+            topic_root_node_common.set_node_common_key(group_key_common)
             topic.set_root_tree_common(topic_root_node_common)
-            # call function next
-        if not (pub_sub_tree is None):
+            # call function next - not here, recheck
+
+        if not (pub_tree is None):
+            topic_root_node_publishers = TreeNode('0', root_node=True)
+            publisher_public_key = generate_key()  # this method needs to be described
+            publisher_private_key = generate_key()
+            group_key_publishers['publisher_public_key'] = publisher_public_key
+            group_key_publishers['publisher_private_key'] = publisher_private_key
+            topic_root_node_publishers.set_node_publisher_keys(group_key_publishers)
+            topic.set_root_tree_publishers(topic_root_node_publishers)  # also try to set the depth and no. children
+
+        if not (sub_tree is None):
+            topic_root_node_subscribers = TreeNode('0', root_node=True)
+            subscriber_public_key = generate_key()
+            subscriber_private_key = generate_key()
+            group_key_subscribers['subscriber_public_key'] = subscriber_public_key
+            group_key_subscribers['subscriber_private_key'] = subscriber_private_key
+            topic_root_node_subscribers.set_node_subscriber_keys(group_key_subscribers)
+            topic.set_root_tree_subscribers(topic_root_node_subscribers)
+
+        # check the commented part again
+        '''if not (pub_sub_tree is None):
             topic_root_node_publishers = TreeNode('0', root_node=True)
             topic_root_node_subscribers = TreeNode('0', root_node=True)
             # yet to find a way to generate eliptic curve public and private keys
@@ -144,8 +168,13 @@ class LKH:
                 elif key == 'common_group_key':
                     group_key_subscribers['common_group_key'] = common_group_key
             topic_root_node_subscribers.set_node_keys(group_key_subscribers)
-            topic.set_root_tree_subscribers(topic_root_node_subscribers)
-                # call function here
+            topic.set_root_tree_subscribers(topic_root_node_subscribers)'''
+
+        # call function here to generate the tree
+        # set topic and permissions for the particiapnts (do not forget)
+        # check participant permissions and create separate lists for all permission types
+        # check if pub and sub trees are not none and add participants to the trees accordingly
+
 
     @staticmethod
     def get_ancestors_all_participants(topic):
@@ -160,6 +189,7 @@ class LKH:
                 ancestors_list.append(list(node.ancestors))
         return children_list, ancestors_list
 
+# add and delete participant also needs to be changed based on permissions and groups
     @staticmethod
     def add_participant(topic, participant):
         # get one empty node and add participant

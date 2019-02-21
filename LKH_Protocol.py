@@ -175,7 +175,6 @@ class LKH:
         # check participant permissions and create separate lists for all permission types
         # check if pub and sub trees are not none and add participants to the trees accordingly
 
-
     @staticmethod
     def get_ancestors_all_participants(topic):
         children_list = []

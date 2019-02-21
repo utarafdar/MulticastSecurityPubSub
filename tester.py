@@ -22,7 +22,7 @@ participants = [participant1, participant2, participant3]
 # print(dict_test)
 
 topic = Topic("test", 3, 2)
-result_tree = test_lkh.setup_tree_with_participants(topic, participants)
+result_tree = test_lkh.setup_topic_trees(topic, participants)
 #result_tree = test_lkh.setup_tree_with_participants(topic)
 print(RenderTree(result_tree))
 

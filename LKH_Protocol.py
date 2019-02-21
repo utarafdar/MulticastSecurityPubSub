@@ -7,16 +7,30 @@ from PublishSubscribeTreeKeys import PublishSubscribeTreeKeys
 
 # todo -- figure out what data needs to be persisted and how
 
+
 def generate_key():
     return 10
 
 
 class LKH:
     @staticmethod
-    def __setup_tree_no_participants(topic):
+    def __generate_tree(topic, participants=None, common_tree=False, pub_tree=False, sub_tree=False):
         # todo -- check how to pass depth and no of children automatically and by arguments
+        # height and depth not fitting number of a participants
+        if not (participants is None):
+            if len(participants) > topic.no_of_children ** (topic.depth - 1):
+                return "error message"  # todo -- customize the error message
+        current_parents = None
+        if common_tree is True:
+            current_parents = [topic.root_tree_common]
+
+        if pub_tree is True:
+            current_parents = [topic.root_tree_publishers]
+
+        if sub_tree is True:
+            current_parents = [topic.root_tree_subscribers]
+
         node_count = 1
-        current_parents = [topic.root_tree]
         temp_parent = []
         for d in range(topic.depth):
             for parent in current_parents:
@@ -29,10 +43,37 @@ class LKH:
             current_parents = list(temp_parent)
             temp_parent.clear()
 
-        return topic.root_tree, current_parents, node_count
+        if participants is None:
+            return topic.root_tree, current_parents, node_count
+
+        ################################################################
+
+        leaf_nodes = current_parents
+        participant_count = 0
+        node_id = node_count
+        for leaf in leaf_nodes:
+            if not (participants is None):
+                if participant_count < len(participants):
+                    node_id += 1
+                    # adding topic to the participant
+                    # does it make sense to do this at key manager level?
+                    participants[participant_count].add_topic(topic)
+                    leaf_node = LeafNode(node_id, participants[participant_count])
+                    Node(participants[participant_count].participant_id, parent=leaf.parent, leaf_node=leaf_node)
+                    leaf.parent = None
+                    leaf.tree_node = None
+                    participant_count += 1
+                else:
+                    break
+        for p in range(participant_count, len(leaf_nodes)):
+            Node("empty", parent=leaf_nodes[p].parent, leaf_node=LeafNode(leaf_nodes[p].tree_node.node_id))
+            leaf_nodes[p].parent = None
+            leaf_nodes[p].tree_node = None
+            # leaf_node = leaf[0].tree_node
+        return topic
 
     @staticmethod
-    def setup_tree_with_participants(topic, participants=None):
+    def setup_topic_trees(topic, participants=None):
         # check for type of publish subscribe group  and proceed further
         if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
             # call functions here
@@ -94,35 +135,7 @@ class LKH:
         else:
             pass  # return error
 
-        # height and depth not fitting number of a participants
-        if not (participants is None):
-            if len(participants) > topic.no_of_children**(topic.depth-1):
-                return "error message"
-        tree = LKH.__setup_tree_no_participants(topic)
-        leaf_nodes = tree[1]
-        parent_node = tree[0]
-        participant_count = 0
-        node_id = tree[2]
-        for leaf in leaf_nodes:
-            if not (participants is None):
-                if participant_count < len(participants):
-                    node_id += 1
-                    # adding topic to the participant
-                    # does it make sense to do this at key manager level?
-                    participants[participant_count].add_topic(topic)
-                    leaf_node = LeafNode(node_id, participants[participant_count])
-                    Node(participants[participant_count].participant_id, parent=leaf.parent, leaf_node=leaf_node)
-                    leaf.parent = None
-                    leaf.tree_node = None
-                    participant_count += 1
-                else:
-                    break
-        for p in range(participant_count, len(leaf_nodes)):
-            Node("empty", parent=leaf_nodes[p].parent, leaf_node=LeafNode(leaf_nodes[p].tree_node.node_id))
-            leaf_nodes[p].parent = None
-            leaf_nodes[p].tree_node = None
-            # leaf_node = leaf[0].tree_node
-        return parent_node
+
 
     # def get_ancestor_keys(self, participants, topic):
     #     participants_ancestors_dict = {}
@@ -215,51 +228,22 @@ class LKH:
             topic_root_node_subscribers.set_node_subscriber_keys(group_key_subscribers)
             topic.set_root_tree_subscribers(topic_root_node_subscribers)
 
-        # check the commented part again
-        '''if not (pub_sub_tree is None):
-            topic_root_node_publishers = TreeNode('0', root_node=True)
-            topic_root_node_subscribers = TreeNode('0', root_node=True)
-            # yet to find a way to generate eliptic curve public and private keys
-            publisher_public_key = generate_key()
-            publisher_private_key = generate_key()
-            subscriber_public_key = generate_key()
-            subscriber_private_key = generate_key()
-            common_group_key = generate_key()
-            for key in pub_sub_tree['publisher_tree']:
-                if key == 'publisher_public_key':
-                    group_key_publishers['publisher_public_key'] = publisher_public_key
-                elif key == 'publisher_private_key':
-                    group_key_publishers['publisher_private_key'] = publisher_private_key
-                elif key == 'subscriber_public_key':
-                    group_key_publishers['subscriber_public_key'] = subscriber_public_key
-                elif key == 'subscriber_private_key':
-                    group_key_publishers['subscriber_private_key'] = subscriber_private_key
-                elif key == 'common_group_key':
-                    group_key_publishers['common_group_key'] = common_group_key
-            # create a root node with all the data
-            topic_root_node_publishers.set_node_keys(group_key_publishers)
-            topic.set_root_tree_publishers(topic_root_node_publishers)
-            # call function here to generate trees with keys
-            # test comment
+        # todo -- function to segregate participants based on the permissions.
 
-            for key in pub_sub_tree['subscriber_tree']:
-                if key == 'publisher_public_key':
-                    group_key_subscribers['publisher_public_key'] = publisher_public_key
-                elif key == 'publisher_private_key':
-                    group_key_subscribers['publisher_private_key'] = publisher_private_key
-                elif key == 'subscriber_public_key':
-                    group_key_subscribers['subscriber_public_key'] = subscriber_public_key
-                elif key == 'subscriber_private_key':
-                    group_key_subscribers['subscriber_private_key'] = subscriber_private_key
-                elif key == 'common_group_key':
-                    group_key_subscribers['common_group_key'] = common_group_key
-            topic_root_node_subscribers.set_node_keys(group_key_subscribers)
-            topic.set_root_tree_subscribers(topic_root_node_subscribers)'''
+        # todo -- handle tree sizes
+
+        if topic.root_tree_common is not None:
+            LKH.__generate_tree(topic, participants, common_tree=True)
+
+        if topic.root_tree_publishers is not None and topic.root_tree_subscribers is not None:
+            LKH.__generate_tree(topic, participants, pub_tree=True)
+            LKH.__generate_tree(topic, participants, sub_tree=True)
 
         # call function here to generate the tree
         # set topic and permissions for the particiapnts (do not forget)
         # check participant permissions and create separate lists for all permission types
         # check if pub and sub trees are not none and add participants to the trees accordingly
+
 
     @staticmethod
     def get_ancestors_all_participants(topic):

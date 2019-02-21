@@ -39,7 +39,7 @@ class Topic:
         self.depth_publisher_tree = depth_publisher_tree
 
     def set_root_tree_subscribers(self, root_node_subscribers, no_of_children_subscriber_tree=None, depth_subscriber_tree=None):
-        self.root_tree_publishers = root_node_subscribers
+        self.root_tree_subscribers = root_node_subscribers
         self.no_of_children_subscriber_tree = no_of_children_subscriber_tree
         self.depth_subscriber_tree = depth_subscriber_tree
     # @property

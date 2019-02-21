@@ -1,0 +1,92 @@
+@staticmethod
+    def __setup_tree_no_participants(topic):
+        # todo -- check how to pass depth and no of children automatically and by arguments
+        node_count = 1
+        current_parents = [topic.root_tree]
+        temp_parent = []
+        for d in range(topic.depth):
+            for parent in current_parents:
+                for k in range(topic.no_of_children):
+                    children_node = TreeNode(node_count)
+                    children_tree_node = Node(str(node_count), parent=parent, tree_node=children_node)
+                    temp_parent.append(children_tree_node)
+                    node_count += 1
+            current_parents.clear()
+            current_parents = list(temp_parent)
+            temp_parent.clear()
+
+        return topic.root_tree, current_parents, node_count
+==============================================================================================================
+@staticmethod
+    def setup_tree_with_participants(topic, participants=None):
+    # height and depth not fitting number of a participants
+        if not (participants is None):
+            if len(participants) > topic.no_of_children**(topic.depth-1):
+                return "error message"
+        tree = LKH.__setup_tree_no_participants(topic)
+        leaf_nodes = tree[1]
+        parent_node = tree[0]
+        participant_count = 0
+        node_id = tree[2]
+        for leaf in leaf_nodes:
+            if not (participants is None):
+                if participant_count < len(participants):
+                    node_id += 1
+                    # adding topic to the participant
+                    # does it make sense to do this at key manager level?
+                    participants[participant_count].add_topic(topic)
+                    leaf_node = LeafNode(node_id, participants[participant_count])
+                    Node(participants[participant_count].participant_id, parent=leaf.parent, leaf_node=leaf_node)
+                    leaf.parent = None
+                    leaf.tree_node = None
+                    participant_count += 1
+                else:
+                    break
+        for p in range(participant_count, len(leaf_nodes)):
+            Node("empty", parent=leaf_nodes[p].parent, leaf_node=LeafNode(leaf_nodes[p].tree_node.node_id))
+            leaf_nodes[p].parent = None
+            leaf_nodes[p].tree_node = None
+            # leaf_node = leaf[0].tree_node
+        return parent_node
+ ==============================================================================================================
+             # check the commented part again
+        '''if not (pub_sub_tree is None):
+            topic_root_node_publishers = TreeNode('0', root_node=True)
+            topic_root_node_subscribers = TreeNode('0', root_node=True)
+            # yet to find a way to generate eliptic curve public and private keys
+            publisher_public_key = generate_key()
+            publisher_private_key = generate_key()
+            subscriber_public_key = generate_key()
+            subscriber_private_key = generate_key()
+            common_group_key = generate_key()
+            for key in pub_sub_tree['publisher_tree']:
+                if key == 'publisher_public_key':
+                    group_key_publishers['publisher_public_key'] = publisher_public_key
+                elif key == 'publisher_private_key':
+                    group_key_publishers['publisher_private_key'] = publisher_private_key
+                elif key == 'subscriber_public_key':
+                    group_key_publishers['subscriber_public_key'] = subscriber_public_key
+                elif key == 'subscriber_private_key':
+                    group_key_publishers['subscriber_private_key'] = subscriber_private_key
+                elif key == 'common_group_key':
+                    group_key_publishers['common_group_key'] = common_group_key
+            # create a root node with all the data
+            topic_root_node_publishers.set_node_keys(group_key_publishers)
+            topic.set_root_tree_publishers(topic_root_node_publishers)
+            # call function here to generate trees with keys
+            # test comment
+
+            for key in pub_sub_tree['subscriber_tree']:
+                if key == 'publisher_public_key':
+                    group_key_subscribers['publisher_public_key'] = publisher_public_key
+                elif key == 'publisher_private_key':
+                    group_key_subscribers['publisher_private_key'] = publisher_private_key
+                elif key == 'subscriber_public_key':
+                    group_key_subscribers['subscriber_public_key'] = subscriber_public_key
+                elif key == 'subscriber_private_key':
+                    group_key_subscribers['subscriber_private_key'] = subscriber_private_key
+                elif key == 'common_group_key':
+                    group_key_subscribers['common_group_key'] = common_group_key
+            topic_root_node_subscribers.set_node_keys(group_key_subscribers)
+            topic.set_root_tree_subscribers(topic_root_node_subscribers)'''
+  ===============================================================================================================

@@ -12,7 +12,7 @@ class Participant:
         # need to include logic for tree arrays
         # also add message names to subscribe in case of participant leave/join
         self.topics.append(topic)
-        self.topic_id_user_permissions_dict.update({topic.id:participant_permissions})
+        self.topic_id_user_permissions_dict.update({topic.id: participant_permissions})
 
     def delete_topic(self, topic):
         # need to include logic for tree arrays

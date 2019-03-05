@@ -10,7 +10,7 @@ class Topic:
     def __init__(self, topic_name, depth=None, no_of_children=None, root_node=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
         self.topicName = topic_name
         if root_node is None:
-            root_node = TreeNode('0') # keeo it so that other stuff does not break, delete later after testing
+            root_node = TreeNode('0')  # keep it so that other stuff does not break, delete later after testing
         self.root_tree = Node(topic_name, tree_node=root_node)
         self.depth = depth
         self.no_of_children = no_of_children
@@ -29,17 +29,20 @@ class Topic:
         self.depth_subscriber_tree = None
 
     def set_root_tree_common(self, root_node_common, no_of_children_common_tree=None, depth_common_tree=None):
-        self.root_tree_common = root_node_common
+        self.root_tree_common = Node(self.topicName, tree_node=root_node_common)
+        #self.root_tree_common = root_node_common
         self.no_of_children_common_tree = no_of_children_common_tree
         self.depth_common_tree = depth_common_tree
 
     def set_root_tree_publishers(self, root_node_publishers, no_of_children_publisher_tree=None, depth_publisher_tree=None):
-        self.root_tree_publishers = root_node_publishers
+        self.root_tree_publishers = Node(self.topicName, tree_node=root_node_publishers)
+        #self.root_tree_publishers = root_node_publishers
         self.no_of_children_publisher_tree = no_of_children_publisher_tree
         self.depth_publisher_tree = depth_publisher_tree
 
     def set_root_tree_subscribers(self, root_node_subscribers, no_of_children_subscriber_tree=None, depth_subscriber_tree=None):
-        self.root_tree_subscribers = root_node_subscribers
+        self.root_tree_subscribers = Node(self.topicName, tree_node=root_node_subscribers)
+        #self.root_tree_subscribers = root_node_subscribers
         self.no_of_children_subscriber_tree = no_of_children_subscriber_tree
         self.depth_subscriber_tree = depth_subscriber_tree
     # @property

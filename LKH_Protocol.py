@@ -23,6 +23,7 @@ class LKH:
         current_parents = None
         if common_tree is True:
             current_parents = [topic.root_tree_common]
+            print(current_parents[0].is_root)
 
         if pub_tree is True:
             current_parents = [topic.root_tree_publishers]
@@ -37,6 +38,7 @@ class LKH:
                 for k in range(topic.no_of_children):
                     children_node = TreeNode(node_count)
                     children_tree_node = Node(str(node_count), parent=parent, tree_node=children_node)
+                    children_tree_node.is_root
                     temp_parent.append(children_tree_node)
                     node_count += 1
             current_parents.clear()
@@ -57,7 +59,7 @@ class LKH:
                     node_id += 1
                     # adding topic to the participant
                     # does it make sense to do this at key manager level?
-                    participants[participant_count].add_topic(topic)
+                    # participants[participant_count].add_topic(topic) # topic commented
                     leaf_node = LeafNode(node_id, participants[participant_count])
                     Node(participants[participant_count].participant_id, parent=leaf.parent, leaf_node=leaf_node)
                     leaf.parent = None
@@ -73,12 +75,12 @@ class LKH:
         return topic
 
     @staticmethod
-    def setup_topic_trees(topic, participants=None):
+    def setup_topic_trees(topic, participants_permissions=None):
         # check for type of publish subscribe group  and proceed further
         if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
             # call functions here
             # set publisher, subscriber and common trees based on the group
-            LKH.__setup_pub_sub_group_trees(topic, participants, common_tree=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=True)
 
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
@@ -87,7 +89,7 @@ class LKH:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
                                             pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
 
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
@@ -97,7 +99,7 @@ class LKH:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=False,
                                                      subscriber_private_key=False)
-            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
                                             pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
 
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB \
@@ -108,7 +110,7 @@ class LKH:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
                                             pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
 
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB:
@@ -119,7 +121,7 @@ class LKH:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
                                             pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
 
         elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
@@ -129,13 +131,11 @@ class LKH:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants, pub_tree=True, sub_tree=True,
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
                                             pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
 
         else:
             pass  # return error
-
-
 
     # def get_ancestor_keys(self, participants, topic):
     #     participants_ancestors_dict = {}
@@ -151,14 +151,15 @@ class LKH:
     # In this method trees are created based on the type publisher-
     # -subscriber group
     @staticmethod
-    def __setup_pub_sub_group_trees(topic, participants=None, pub_tree=None, sub_tree=None, common_tree=None,
+    def __setup_pub_sub_group_trees(topic, participants_permissions=None, pub_tree=None, sub_tree=None, common_tree=None,
                                     pub_tree_keys=None, sub_tree_keys=None):
         # how to get permissions of individual participant?-receive a map of participant and permissions.
         # set keys in the tree node object
         # not sure below 2 needed yet
+
         group_key_common = None
-        group_key_publishers = None  # can test for None instead here (quick check)
-        group_key_subscribers = None
+        group_key_publishers = dict()  # can test for None instead here (quick check)
+        group_key_subscribers = dict()
         publisher_public_key = None
         publisher_private_key = None
         subscriber_public_key = None
@@ -228,22 +229,41 @@ class LKH:
             topic_root_node_subscribers.set_node_subscriber_keys(group_key_subscribers)
             topic.set_root_tree_subscribers(topic_root_node_subscribers)
 
-        # todo -- function to segregate participants based on the permissions.
-
         # todo -- handle tree sizes
 
         if topic.root_tree_common is not None:
+            participants = []
+            for participant in participants_permissions:
+                # print (participant[0])
+                participant[0].add_topic(topic, participant[1])
+                participants.append(participant[0])
             LKH.__generate_tree(topic, participants, common_tree=True)
 
-        if topic.root_tree_publishers is not None and topic.root_tree_subscribers is not None:
-            LKH.__generate_tree(topic, participants, pub_tree=True)
-            LKH.__generate_tree(topic, participants, sub_tree=True)
+        else:
+            # todo todo
+            # participants segregation
+            publish_tree_participants = []
+            subscribe_tree_participants = []
+            for participant in participants_permissions:
+                if participant[1] is PermissionTypesEnum.PUBLISH:
+                    participant[0].add_topic(topic, participant[1])
+                    publish_tree_participants.append(participant[0])
+                if participant[1] is PermissionTypesEnum.SUBSCRIBE:
+                    participant[0].add_topic(topic, participant[1])
+                    subscribe_tree_participants.append(participant[0])
+                if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE:
+                    participant[0].add_topic(topic, participant[1])
+                    publish_tree_participants.append(participant[0])
+                    subscribe_tree_participants.append(participant[0])
+
+            if topic.root_tree_publishers is not None and topic.root_tree_subscribers is not None:
+                LKH.__generate_tree(topic, publish_tree_participants, pub_tree=True)
+                LKH.__generate_tree(topic, subscribe_tree_participants, sub_tree=True)
 
         # call function here to generate the tree
-        # set topic and permissions for the particiapnts (do not forget)
+        # set topic and permissions for the participants (do not forget)
         # check participant permissions and create separate lists for all permission types
         # check if pub and sub trees are not none and add participants to the trees accordingly
-
 
     @staticmethod
     def get_ancestors_all_participants(topic):

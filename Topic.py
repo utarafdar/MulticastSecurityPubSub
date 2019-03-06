@@ -27,6 +27,8 @@ class Topic:
         self.depth_publisher_tree = None
         self.no_of_children_subscriber_tree = None
         self.depth_subscriber_tree = None
+        self.edge_case_one_publisher_keys = None
+        self.edge_case_one_subscriber_keys = None
 
     def set_root_tree_common(self, root_node_common, no_of_children_common_tree=None, depth_common_tree=None):
         self.root_tree_common = Node(self.topicName, tree_node=root_node_common)

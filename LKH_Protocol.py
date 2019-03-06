@@ -23,7 +23,6 @@ class LKH:
         current_parents = None
         if common_tree is True:
             current_parents = [topic.root_tree_common]
-            print(current_parents[0].is_root)
 
         if pub_tree is True:
             current_parents = [topic.root_tree_publishers]
@@ -77,62 +76,62 @@ class LKH:
     @staticmethod
     def setup_topic_trees(topic, participants_permissions=None):
         # check for type of publish subscribe group  and proceed further
-        if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB:
+        if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
             # call functions here
             # set publisher, subscriber and common trees based on the group
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=True)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=True, pub_tree=False,
+                                            sub_tree=False)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=False)
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
-                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=False,
+                                            pub_tree=True, sub_tree=True, pub_tree_keys=pub_tree_keys,
+                                            sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=True, subscriber_public_key=False,
                                                      subscriber_private_key=False)
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=False,
                                                      subscriber_private_key=False)
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
-                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=False, pub_tree=True,
+                                            sub_tree=True, pub_tree_keys=pub_tree_keys,
+                                            sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB \
-                or topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB:
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value \
+                or topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=True, subscriber_public_key=True,
                                                      subscriber_private_key=False)
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
-                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=False, pub_tree=True,
+                                            sub_tree=True, pub_tree_keys=pub_tree_keys,
+                                            sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB:
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
             # todo -- check this again
-            pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
-                                                     publisher_private_key=False, subscriber_public_key=True,
-                                                     subscriber_private_key=False)
-            sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
-                                                     publisher_private_key=False, subscriber_public_key=True,
-                                                     subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
-                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
-
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
-                                                     publisher_private_key=True, subscriber_public_key=False,
+                                                     publisher_private_key=True, subscriber_public_key=True,
                                                      subscriber_private_key=False)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=False, pub_tree=True,
+                                            sub_tree=False, pub_tree_keys=pub_tree_keys,
+                                            sub_tree_keys=None)
+
+        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
-                                                     publisher_private_key=False, subscriber_public_key=True,
-                                                     subscriber_private_key=True)
-            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, pub_tree=True, sub_tree=True,
-                                            pub_tree_keys=pub_tree_keys, sub_tree_keys=sub_tree_keys)
+                                                     publisher_private_key=False, subscriber_public_key=False,
+                                                     subscriber_private_key=False)
+            LKH.__setup_pub_sub_group_trees(topic, participants_permissions, common_tree=False, pub_tree=False,
+                                            sub_tree=True, pub_tree_keys=None,
+                                            sub_tree_keys=sub_tree_keys)
 
         else:
             pass  # return error
@@ -171,11 +170,13 @@ class LKH:
             topic_root_node_common = TreeNode('0', root_node=True)
             group_key_common = generate_key()
             topic_root_node_common.set_node_common_key(group_key_common)
+            # check thorough
+            # topic_root_node_common.node_id = group_key_common
             topic.set_root_tree_common(topic_root_node_common)
             # call function next - not here, recheck
 
         # generate all the keys
-        if pub_tree is True and sub_tree is True:
+        if pub_tree is True:
             # checking only public key will suffice, because if there is a public key, there will definitely be a
             # private key
             if pub_tree_keys.publisher_public_key is True:
@@ -189,7 +190,19 @@ class LKH:
                 subscriber_public_key = generate_key()
                 subscriber_private_key = generate_key()
 
-        if not (pub_tree is None):
+        if sub_tree is True:
+            if sub_tree_keys.publisher_public_key is True:
+                # generate public and private keys
+                # todo -- find an appropriate method to generate ECC public and private keys
+                publisher_public_key = generate_key()
+                publisher_private_key = generate_key()
+
+            if sub_tree_keys.subscriber_public_key is True:
+                # generate public private keys
+                subscriber_public_key = generate_key()
+                subscriber_private_key = generate_key()
+
+        if pub_tree is True:
             topic_root_node_publishers = TreeNode('0', root_node=True)
             if pub_tree_keys.publisher_public_key is True:
                 group_key_publishers['publisher_public_key'] = publisher_public_key
@@ -209,7 +222,7 @@ class LKH:
             topic_root_node_publishers.set_node_publisher_keys(group_key_publishers)
             topic.set_root_tree_publishers(topic_root_node_publishers)  # also try to set the depth and no. children
 
-        if not (sub_tree is None):
+        if sub_tree is True:
             topic_root_node_subscribers = TreeNode('0', root_node=True)
             if sub_tree_keys.publisher_public_key is True:
                 group_key_subscribers['publisher_public_key'] = publisher_public_key
@@ -229,29 +242,39 @@ class LKH:
             topic_root_node_subscribers.set_node_subscriber_keys(group_key_subscribers)
             topic.set_root_tree_subscribers(topic_root_node_subscribers)
 
+        # handle edge cases single publisher or subscriber key
+        if topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+            topic.edge_case_one_publisher_keys = {'common_key': group_key_common,
+                                                  'publisher_public_key': publisher_public_key,
+                                                  'publisher_private_key': publisher_private_key
+                                                  }
+        if topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+            topic.edge_case_one_subscriber_keys = {'common_key': group_key_common,
+                                                   'subscriber_public_key': subscriber_public_key,
+                                                   'subscriber_private_key': subscriber_private_key,
+                                                   'publisher_public_key': publisher_public_key}
+
         # todo -- handle tree sizes
 
         if topic.root_tree_common is not None:
             participants = []
             for participant in participants_permissions:
-                # print (participant[0])
                 participant[0].add_topic(topic, participant[1])
                 participants.append(participant[0])
             LKH.__generate_tree(topic, participants, common_tree=True)
 
         else:
-            # todo todo
             # participants segregation
             publish_tree_participants = []
             subscribe_tree_participants = []
             for participant in participants_permissions:
-                if participant[1] is PermissionTypesEnum.PUBLISH:
+                if participant[1] is PermissionTypesEnum.PUBLISH.value:
                     participant[0].add_topic(topic, participant[1])
                     publish_tree_participants.append(participant[0])
-                if participant[1] is PermissionTypesEnum.SUBSCRIBE:
+                if participant[1] is PermissionTypesEnum.SUBSCRIBE.value:
                     participant[0].add_topic(topic, participant[1])
                     subscribe_tree_participants.append(participant[0])
-                if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE:
+                if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     participant[0].add_topic(topic, participant[1])
                     publish_tree_participants.append(participant[0])
                     subscribe_tree_participants.append(participant[0])
@@ -265,6 +288,7 @@ class LKH:
         # check participant permissions and create separate lists for all permission types
         # check if pub and sub trees are not none and add participants to the trees accordingly
 
+    # changes needed -- todo--
     @staticmethod
     def get_ancestors_all_participants(topic):
         children_list = []
@@ -280,8 +304,10 @@ class LKH:
 
 # add and delete participant also needs to be changed based on permissions and groups
     @staticmethod
-    def add_participant(topic, participant):
+    def add_participant(topic, participant, participant_permission):
+        # first check permissions and check if those are valid permissions in that group type
         # get one empty node and add participant
+        # long if else based on topic type and permissions type
         empty_node = findall_by_attr(topic.root_tree, "empty")[0]
         participant.add_topic(topic)  # include code for user-permissions  # or better move this to top
         new_leaf_node = LeafNode(empty_node.leaf_node.node_id, participant)
@@ -294,6 +320,8 @@ class LKH:
         ancestor_list = added_participant.ancestors
         for ancestor in ancestor_list:
             ancestor.tree_node.reset_key()
+            # change the keys of root node here
+
         # code to add details about the messages to be sent
         # first construct messages for participant and its siblings
         message_details_dict_list = []
@@ -316,6 +344,8 @@ class LKH:
                     "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
                     "encryption_key": child.tree_node.node_key,
                     "changed_parent_key": child.parent.tree_node.node_key}
+                # if last i.e. root node then encryption keys is the list of changed pub-sub keys
+                # add that condition for the last one. when ancestor = 0 basically.
                 message_details_dict_list.append(message_detail)
 
         return topic.root_tree, added_participant, message_details_dict_list
@@ -443,6 +473,40 @@ class LKH:
                 id_to_node[node["node_id"]].parent = id_to_node[node["parent"]]
 
         return parent_node, id_to_node
+
+    # handle error conditions
+    @staticmethod
+    def __is_allowed_permission(topic_pub_sub_group_type, participant_permission):
+
+        if topic_pub_sub_group_type is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                return False
+            elif participant_permission is PermissionTypesEnum.PUBLISH.value:
+                return False
+            else:
+                return True
+
+        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                return False
+            else:
+                return True
+
+        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
+            if participant_permission is PermissionTypesEnum.PUBLISH.value:
+                return False
+            else:
+                return True
+
+        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
+            if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+                return False
+            else:
+                return True
+
+        else:
+            return True
+
 
 
 

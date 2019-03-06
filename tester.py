@@ -24,7 +24,8 @@ participants = [participant1, participant2, participant3]
 participants_permissions = [(participant1, 3), (participant2, 3), (participant3, 3)]
 
 topic = Topic("test", 3, 2)
-print(topic.type_of_pub_sub_group)
+print(topic.type_of_pub_sub_group.value)
+
 #result_tree = test_lkh.setup_topic_trees(topic, participants,TypeOfPubSubGroupEnum=1)
 #result_tree = test_lkh.setup_tree_with_participants(topic)
 #print(RenderTree(result_tree))
@@ -32,10 +33,11 @@ print(topic.type_of_pub_sub_group)
 #print(RenderTree(topic.root_tree_common))
 
 topic2 = Topic("test", 3, 2, type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB)
-print(topic2.type_of_pub_sub_group)
+
 participants_permissions2 = [(participant1, PermissionTypesEnum.PUBLISH), (participant2, PermissionTypesEnum.SUBSCRIBE), (participant3, PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE)]
 test_lkh.setup_topic_trees(topic2, participants_permissions2)
 print(RenderTree(topic2.root_tree_publishers))
+print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
 print(RenderTree(topic2.root_tree_subscribers))
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)

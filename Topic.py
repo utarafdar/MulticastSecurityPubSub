@@ -20,6 +20,7 @@ class Topic:
         self.root_tree_common = None
         self.root_tree_publishers = None
         self.root_tree_subscribers = None
+        self.root_tree_pub_sub = None
         # a way to set no of children and depth for individual groups
         self.no_of_children_common_tree = None
         self.depth_common_tree = None
@@ -47,6 +48,12 @@ class Topic:
         #self.root_tree_subscribers = root_node_subscribers
         self.no_of_children_subscriber_tree = no_of_children_subscriber_tree
         self.depth_subscriber_tree = depth_subscriber_tree
+
+    def set_root_tree_pub_sub(self, root_node_pub_sub, no_of_children_publisher_tree=None, depth_publisher_tree=None):
+        self.root_tree_pub_sub = Node(self.topicName, tree_node=root_node_pub_sub)
+        #self.root_tree_publishers = root_node_publishers
+        self.no_of_children_publisher_tree = no_of_children_publisher_tree
+        self.depth_publisher_tree = depth_publisher_tree
     # @property
     # def email(self):
     #     return '{}.{}@email.com'.format(self.first, self.last)

@@ -5,6 +5,7 @@ from anytree.exporter import JsonExporter
 from TreeNode import TreeNode
 from anytree import Node, RenderTree, findall_by_attr, findall, Resolver
 from CustomEnums import TypeOfPubSubGroupEnum, PermissionTypesEnum
+from PubSubKeyManagerTreeType import KeyManager
 test_lkh = LKH()
 #test_tree = test_lkh.setup_tree_no_participants(3, 2, "test")[0]
 #print(findall_by_attr(test_tree, "3")[0].tree_node.node_key)
@@ -32,13 +33,14 @@ print(topic.type_of_pub_sub_group.value)
 #test_lkh.setup_topic_trees(topic, participants_permissions)
 #print(RenderTree(topic.root_tree_common))
 
-topic2 = Topic("test", 3, 2, type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB)
+topic2 = Topic("test", 3, 2, type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value)
 
-participants_permissions2 = [(participant1, PermissionTypesEnum.PUBLISH), (participant2, PermissionTypesEnum.SUBSCRIBE), (participant3, PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE)]
-test_lkh.setup_topic_trees(topic2, participants_permissions2)
+participants_permissions2 = [(participant1, 1), (participant2, 2), (participant3, 3)]
+KeyManager.setup_topic_trees(topic2, participants_permissions2)
 print(RenderTree(topic2.root_tree_publishers))
-print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
+#print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
 print(RenderTree(topic2.root_tree_subscribers))
+print(RenderTree(topic2.root_tree_pub_sub))
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)
 # print(findall_by_attr(result_tree, "001")[0].name)

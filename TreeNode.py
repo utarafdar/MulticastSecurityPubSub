@@ -12,6 +12,7 @@ class TreeNode:
         self.node_common_key = None
         self.node_publisher_keys = None  # empty or None checkout
         self.node_subscriber_keys = None
+        self.node_pub_sub_keys = None
         self.root_node = root_node
         self.depth = depth
         self.no_of_children = no_of_children
@@ -21,6 +22,9 @@ class TreeNode:
 
     def set_node_publisher_keys(self, publisher_keys):
         self.node_publisher_keys = publisher_keys.copy()
+
+    def set_node_pub_sub_keys(self, pub_sub_keys):
+        self.node_pub_sub_keys = pub_sub_keys.copy()
 
     def set_node_subscriber_keys(self, subscriber_keys):
         self.node_subscriber_keys = subscriber_keys.copy()

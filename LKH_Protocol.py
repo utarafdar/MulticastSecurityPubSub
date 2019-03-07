@@ -184,10 +184,10 @@ class LKH:
         return tree_root, new_empty_node, message_details_dict_list
 
     @staticmethod
-    def update_tree_root_keys(tree_root, updated_keys):
+    def update_tree_root_keys(tree_root, changed_root_keys=None):
 
         message_details_dict_list = []
-        tree_root.tree_node.root_node_keys = updated_keys.copy()
+        tree_root.tree_node.root_node_keys = changed_root_keys.copy()
         children = tree_root.children
 
         for child in children:

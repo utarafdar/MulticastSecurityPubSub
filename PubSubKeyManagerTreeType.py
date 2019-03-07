@@ -331,7 +331,43 @@ class KeyManager:
                                                  'changed_root_keys': pub_sub_keys_reset})
 
         elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
-            pass
+
+            common_keys_reset = generate_key()
+            publisher_public_key_reset = generate_key()
+            publisher_private_key_reset = generate_key()
+
+            pub_sub_keys_reset = {'common_key': common_keys_reset,
+                                  'publisher_public_key': publisher_public_key_reset,
+                                  'publisher_private_key': publisher_private_key_reset}
+
+            publisher_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                    'publisher_private_key': publisher_private_key_reset,
+                                    'common_key': common_keys_reset}
+
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                return "error: invalid permission"
+
+            if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+
+                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': pub_sub_keys_reset})
+                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                                                 'add_participant': False,
+                                                 'delete_participant': False,
+                                                 'changed_root_keys': publisher_keys_reset})
+
+            if participant_permission is PermissionTypesEnum.PUBLISH.value:
+
+                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                                                 'add_participant': False,
+                                                 'delete_participant': False,
+                                                 'changed_root_keys': pub_sub_keys_reset})
+                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': publisher_keys_reset})
 
         elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
 
@@ -399,14 +435,103 @@ class KeyManager:
                                                  'changed_root_keys': publisher_keys_reset})
 
         elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
-            pass
+
+            publisher_public_key_reset = generate_key()
+            publisher_private_key_reset = generate_key()
+            subscriber_public_key_reset = generate_key()
+            subscriber_private_key_reset = generate_key()
+
+            subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                     'subscriber_public_key': subscriber_public_key_reset,
+                                     'subscriber_private_key': subscriber_private_key_reset}
+
+            publisher_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                    'publisher_private_key': publisher_private_key_reset,
+                                    'subscriber_public_key': subscriber_public_key_reset}
+
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': subscriber_keys_reset})
+
+                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                                                 'add_participant': False,
+                                                 'delete_participant': False,
+                                                 'changed_root_keys': publisher_keys_reset})
+
+            if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+                return "error: invalid permissions"
+
+            if participant_permission is PermissionTypesEnum.PUBLISH.value:
+                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                                                 'add_participant': False,
+                                                 'delete_participant': False,
+                                                 'changed_root_keys': subscriber_keys_reset})
+
+                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': publisher_keys_reset})
 
         elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
-            pass
+
+            common_keys_reset = generate_key()
+            subscriber_public_key_reset = generate_key()
+            subscriber_private_key_reset = generate_key()
+
+            publisher_keys_reset = {'common_key': common_keys_reset,
+                                    'subscriber_public_key': subscriber_public_key_reset}
+
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                return "handle if the only subscriber leaves"
+
+            if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+                return "error: invalid permissions"
+
+            if participant_permission is PermissionTypesEnum.PUBLISH.value:
+
+                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': publisher_keys_reset})
+            edge_case_subscriber_keys = {'common_key': common_keys_reset,
+                                         'publisher_public_key': subscriber_public_key_reset,
+                                         'publisher_private_key': subscriber_private_key_reset
+                                        }
+            topic.edge_case_one_publisher_keys = edge_case_subscriber_keys.copy()
 
         elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
-            pass
 
+            common_keys_reset = generate_key()
+            publisher_public_key_reset = generate_key()
+            publisher_private_key_reset = generate_key()
+
+            subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                     'common_key': common_keys_reset}
+
+            if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
+                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                                                 'add_participant': add_participant,
+                                                 'delete_participant': delete_participant,
+                                                 'changed_root_keys': subscriber_keys_reset})
+
+            if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+                return "error: invalid permissions"
+
+            if participant_permission is PermissionTypesEnum.PUBLISH.value:
+                return "handle the only publisher leaving"
+
+            # setting keys for edge case // also need to send message encrypted with pairwise key
+            edge_case_publisher_keys = {'common_key': common_keys_reset,
+                                        'publisher_public_key': publisher_public_key_reset,
+                                        'publisher_private_key': publisher_private_key_reset
+                                                  }
+            topic.edge_case_one_publisher_keys = edge_case_publisher_keys.copy()
+
+        message = tuple()
+        message2 = tuple()
+        message3 = tuple()
         for trees_data in trees_data_to_be_updated:
             if trees_data['add_participant'] is True:
                 message = LKH.add_participant(trees_data['tree'], participant,
@@ -416,7 +541,7 @@ class KeyManager:
                                                   changed_root_keys=trees_data['changed_root_keys'])
 
             if trees_data['add_participant'] is False and trees_data['delete_participant'] is False:
-                message2 = LKH.update_tree_root_keys(trees_data['tree'], participant,
+                message2 = LKH.update_tree_root_keys(trees_data['tree'],
                                                      changed_root_keys=trees_data['changed_root_keys'])
 
-        return message[2], message3[2], message2[1]
+        return message[2],  message2[1]

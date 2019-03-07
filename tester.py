@@ -14,6 +14,7 @@ test_lkh = LKH()
 participant1 = Participant("12345", "001")
 participant2 = Participant("12345", "002")
 participant3 = Participant("12345", "003")
+#participant5 = Participant("12345", "003")
 
 participants = [participant1, participant2, participant3]
 # print(type(participants))
@@ -41,6 +42,10 @@ print(RenderTree(topic2.root_tree_publishers))
 #print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
 print(RenderTree(topic2.root_tree_subscribers))
 print(RenderTree(topic2.root_tree_pub_sub))
+participant4 = Participant("12345", "003")
+result = KeyManager.add_or_delete_participant(topic2, participant4, 3, add_participant=True)
+print(RenderTree(topic2.root_tree_pub_sub))
+print(result)
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)
 # print(findall_by_attr(result_tree, "001")[0].name)

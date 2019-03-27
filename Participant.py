@@ -16,8 +16,8 @@ class Participant:
 
     def delete_topic(self, topic):
         # need to include logic for tree arrays
-        self.topics.remove(topic)
         del self.topic_id_user_permissions_dict[topic.id]
+        self.topics.remove(topic)
 
     def get_message_names_topic(self, topic):
         message_names_to_sub = []

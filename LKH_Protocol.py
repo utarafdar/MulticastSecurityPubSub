@@ -13,7 +13,7 @@ def generate_key():
 
 class LKH:
     @staticmethod
-    def generate_tree(tree_root, no_of_children, depth, participants=None):
+    def generate_tree(tree_root, depth, no_of_children, participants=None):
         # todo -- check how to pass depth and no of children automatically and by arguments
         # height and depth not fitting number of a participants
         if not (participants is None):
@@ -171,7 +171,8 @@ class LKH:
                 message_details_dict_list.append(message_detail)
 
         # delete the participant and add empty node there
-        participant.delete_topic(tree_root)
+        # moved this to manager class
+        # participant.delete_topic(topic)
 
         new_leaf_node = LeafNode(participant_to_be_removed.leaf_node.node_id)
         new_leaf_node.participant = None

@@ -7,13 +7,13 @@ from CustomEnums import TypeOfPubSubGroupEnum
 class Topic:
 
     # todo -- switch depth and number of children to tree class, makes more sense there
-    def __init__(self, topic_name, depth=None, no_of_children=None, root_node=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
+    def __init__(self, topic_name, root_node=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
         self.topicName = topic_name
         if root_node is None:
             root_node = TreeNode('0')  # keep it so that other stuff does not break, delete later after testing
         self.root_tree = Node(topic_name, tree_node=root_node)
-        self.depth = depth
-        self.no_of_children = no_of_children
+        # self.depth = depth
+        # self.no_of_children = no_of_children
         # change this when permissions change
         self.type_of_pub_sub_group = type_of_pub_sub_group
         self.id = uuid.uuid4()
@@ -54,6 +54,8 @@ class Topic:
         #self.root_tree_publishers = root_node_publishers
         self.no_of_children_publisher_tree = no_of_children_publisher_tree
         self.depth_publisher_tree = depth_publisher_tree
+
+
     # @property
     # def email(self):
     #     return '{}.{}@email.com'.format(self.first, self.last)

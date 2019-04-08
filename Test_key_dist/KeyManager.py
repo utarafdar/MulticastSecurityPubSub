@@ -9,6 +9,7 @@ from PubSubKeyManagerTreeType import KeyManager
 import paho.mqtt.client as mqtt
 import json
 import copy
+import time
 
 
 class TestKeyManagerTopic:
@@ -63,7 +64,7 @@ class TestKeyManagerTopic:
             update_msg_topic_name = self.topic.topicName + result['add_participant'][1]['tree_type'] + message['message_name']
             print(update_msg_topic_name)
             # todo -- encrypt here
-            msg_updated_key = str(message['changed_parent_key'])+ str(message['encryption_key'])
+            msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
             publisher_GCKS.publish(update_msg_topic_name, msg_updated_key)
 
         for tree in result['update_tree']:
@@ -71,7 +72,7 @@ class TestKeyManagerTopic:
                 update_msg_topic_name = self.topic.topicName + tree[1]['tree_type'] + message['message_name']
                 # todo -- encrypt here
                 print(update_msg_topic_name)
-                msg_updated_key = str(message['changed_parent_key']) + str(message['encryption_key'])
+                msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
                 publisher_GCKS.publish(update_msg_topic_name, msg_updated_key)
 
         # initial subscribing topics for the client newly added
@@ -99,18 +100,29 @@ class TestKeyManagerTopic:
         topic_to_sub_enc_keys = []
         i = 0
         while i < len(ancestor_list):
-
-            ancestor_keys.append({'name': ancestor_list[i].name,
-                                  'key': ancestor_list[i].tree_node.node_key})
+            if ancestor_list[i].is_root is True:
+                ancestor_keys.append({'name': str(ancestor_list[i].tree_node.node_id),
+                                      'key': ancestor_list[i].tree_node.root_node_keys})
+            else:
+                ancestor_keys.append({'name': str(ancestor_list[i].tree_node.node_id),
+                                      'key': ancestor_list[i].tree_node.node_key})
             if i != len(ancestor_list) - 1:
-                topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name + str(ancestor_list[i].tree_node.node_id )+ '/' + str(ancestor_list[i + 1].tree_node.node_id),
+                topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name +
+                                                              str(ancestor_list[i].tree_node.node_id) + '/' +
+                                                              str(ancestor_list[i + 1].tree_node.node_id) +
+                                                              "__changeParent__" + str(ancestor_list[i].tree_node.node_id ),
                                               'enc_key': ancestor_list[i + 1].tree_node.node_key})
             else:
-                topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name + str(ancestor_list[i].tree_node.node_id) + '/' + client.participant_id,
+                topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name +
+                                                              str(ancestor_list[i].tree_node.node_id) + '/' +
+                                                              client.participant_id + "__changeParent__" +
+                                                              str(ancestor_list[i].tree_node.node_id),
                                               'enc_key': client.pairwise_key})
             i = i + 1
         mqtt_msg = json.dumps(topic_to_sub_enc_keys)  # todo -- encrypt with participant1.pairwise_key
         publisher_GCKS.publish(initial_topic, mqtt_msg)
+
+        time.sleep(5)
 
         mqtt_msg = json.dumps(ancestor_keys)  # todo -- encrypt with participant1.pairwise_key
         publisher_GCKS.publish(initial_topic_anc, mqtt_msg)

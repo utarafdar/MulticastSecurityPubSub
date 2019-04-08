@@ -5,10 +5,11 @@ from Topic import Topic
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 from PublishSubscribeTreeKeys import PublishSubscribeTreeKeys
 from LKH_Protocol import LKH
+import random
 
 
 def generate_key():
-    return 10
+    return random.randrange(1000, 99999)
 
 
 class KeyManager:

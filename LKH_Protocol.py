@@ -3,12 +3,13 @@ from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
+import random
 
 # todo -- figure out what data needs to be persisted and how
 
 
 def generate_key():
-    return 10
+    random.randrange(1000, 99999)
 
 
 class LKH:
@@ -112,7 +113,8 @@ class LKH:
         for sibling in siblings:
             if sibling.leaf_node.participant is not None:
                 message_detail = {# "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
-                                  "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.participant.participant_id),
+                                  "message_name": str(sibling.parent.tree_node.node_id) + "/" +
+                                                  str(sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
                                   "encryption_key": sibling.leaf_node.participant.pairwise_key,
                                   "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)
@@ -122,7 +124,8 @@ class LKH:
             children = ancestor_list[ancestor].children
             for child in children:
                 message_detail = {
-                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
+                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id) +
+                                    "__changeParent__" + str(child.parent.tree_node.node_id),
                     "encryption_key": child.tree_node.node_key}
                 if child.parent.is_root and changed_root_keys is not None:
                     message_detail["changed_parent_key"] = child.parent.tree_node.root_node_keys
@@ -157,7 +160,7 @@ class LKH:
                 message_detail = {
                     # "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
                     "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(
-                        sibling.leaf_node.participant.participant_id),
+                        sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
                     "encryption_key": sibling.leaf_node.participant.pairwise_key,
                     "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)
@@ -166,7 +169,8 @@ class LKH:
             children = ancestor_list[ancestor].children
             for child in children:
                 message_detail = {
-                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
+                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id)
+                                    + "__changeParent__" + str(child.parent.tree_node.node_id),
                     "encryption_key": child.tree_node.node_key}
                 if child.parent.is_root and changed_root_keys is not None:
                     message_detail["changed_parent_key"] = child.parent.tree_node.root_node_keys

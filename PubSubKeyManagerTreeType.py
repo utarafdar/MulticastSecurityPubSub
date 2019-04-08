@@ -569,22 +569,62 @@ class KeyManager:
                                                   }
             topic.edge_case_one_publisher_keys = edge_case_publisher_keys.copy()
 
-        message = tuple()
-        message2 = tuple()
-        message3 = tuple()
+        add_participant_data = dict()
+        delete_participant_data = dict()
+        update_tree_data = list()
+
+        # print(trees_data_to_be_updated)
+
         for trees_data in trees_data_to_be_updated:
             if trees_data['add_participant'] is True:
                 participant.add_topic(topic, participant_permission)
                 message = LKH.add_participant(trees_data['tree'], participant,
                                               changed_root_keys=trees_data['changed_root_keys'])
+                tree_type = ''
+                if trees_data['tree'] == topic.root_tree_publishers:
+                    tree_type = 'pub'
+                if trees_data['tree'] == topic.root_tree_subscribers:
+                    tree_type = 'sub'
+                if trees_data['tree'] == topic.root_tree_pub_sub:
+                    tree_type = 'pub_sub'
+                if trees_data['tree'] == topic.root_tree_common:
+                    tree_type = 'common'
+
+                add_participant_data = (message[2], {'tree_type': tree_type})
+
             if trees_data['delete_participant'] is True:
                 participant.delete_topic(topic)
                 message3 = LKH.delete_participant(trees_data['tree'], participant,
                                                   changed_root_keys=trees_data['changed_root_keys'])
+                tree_type = ''
+                if trees_data['tree'] == topic.root_tree_publishers:
+                    tree_type = 'pub'
+                if trees_data['tree'] == topic.root_tree_subscribers:
+                    tree_type = 'sub'
+                if trees_data['tree'] == topic.root_tree_pub_sub:
+                    tree_type = 'pub_sub'
+                if trees_data['tree'] == topic.root_tree_common:
+                    tree_type = 'common'
+
+                delete_participant_data = (message3[2], {'tree_type': tree_type})
 
             if trees_data['add_participant'] is False and trees_data['delete_participant'] is False:
                 message2 = LKH.update_tree_root_keys(trees_data['tree'],
                                                      changed_root_keys=trees_data['changed_root_keys'])
+                tree_type = ''
+                if trees_data['tree'] == topic.root_tree_publishers:
+                    tree_type = 'pub'
+                if trees_data['tree'] == topic.root_tree_subscribers:
+                    tree_type = 'sub'
+                if trees_data['tree'] == topic.root_tree_pub_sub:
+                    tree_type = 'pub_sub'
+                if trees_data['tree'] == topic.root_tree_common:
+                    tree_type = 'common'
 
+                update_tree_data.append((message2[1], {'tree_type': tree_type}))
+
+        return_message = {'add_participant': add_participant_data,
+                          'delete_participant': delete_participant_data,
+                          'update_tree': update_tree_data}
         # return message3[2],message2[1]
-        return
+        return return_message

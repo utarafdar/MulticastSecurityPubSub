@@ -102,14 +102,17 @@ class LKH:
         # code to add details about the messages to be sent
         # first construct messages for participant and its siblings
         message_details_dict_list = []
-        message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
+        # adding message for the newly added participant to be decided based on other implementations
+        # todo
+        """message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
                           "encryption_key": added_participant.leaf_node.participant.pairwise_key,
                           "changed_parent_key": added_participant.parent.tree_node.node_key}
-        message_details_dict_list.append(message_detail)
+        message_details_dict_list.append(message_detail)"""
         siblings = added_participant.siblings
         for sibling in siblings:
             if sibling.leaf_node.participant is not None:
-                message_detail = {"message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                message_detail = {# "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                                  "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.participant.participant_id),
                                   "encryption_key": sibling.leaf_node.participant.pairwise_key,
                                   "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)
@@ -152,7 +155,9 @@ class LKH:
         for sibling in siblings:
             if sibling.leaf_node.participant is not None:
                 message_detail = {
-                    "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                    # "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                    "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(
+                        sibling.leaf_node.participant.participant_id),
                     "encryption_key": sibling.leaf_node.participant.pairwise_key,
                     "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)

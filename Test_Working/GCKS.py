@@ -81,7 +81,7 @@ publisher_GCKS = mqtt.Client("P3")  # create new instance
 publisher_GCKS.connect(broker_address)
 # need to implement encryption
 mqtt_msg = json.dumps(ancestor_keys)  # todo -- encrypt with participant1.pairwise_key
-publisher_GCKS.publish("GCKS/participant1001", mqtt_msg)
+# publisher_GCKS.publish("GCKS/participant1001", mqtt_msg)
 
 mqtt_msg = json.dumps(topic_to_sub_enc_keys) # todo -- encrypt with participant1.pairwise_key
 publisher_GCKS.publish("GCKS/participant1001", mqtt_msg)

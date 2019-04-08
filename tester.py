@@ -41,19 +41,19 @@ topic2 = Topic("test", type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_S
 
 # some method to calculate tree sizes
 common_tree_size = {'no_of_children': 2,
-                    'depth': 3,
+                    'depth': 4,
                     'tree_type': 'common'}
 
 pub_tree_size = {'no_of_children': 2,
-                 'depth': 3,
+                 'depth': 4,
                  'tree_type': 'pub'}
 
 sub_tree_size = {'no_of_children': 2,
-                 'depth': 3,
+                 'depth': 4,
                  'tree_type': 'sub'}
 
 pub_sub_tree_size = {'no_of_children': 2,
-                     'depth': 3,
+                     'depth': 4,
                      'tree_type': 'pub_sub'}
 tree_sizes = [common_tree_size, pub_tree_size, sub_tree_size, pub_sub_tree_size]
 
@@ -65,11 +65,13 @@ KeyManager.setup_topic_trees(topic2, participants_permissions2, tree_sizes)
 #print(RenderTree(topic2.root_tree_pub_sub))
 participant4 = Participant("12345", "004")
 result = KeyManager.add_or_delete_participant(topic2, participant4, 3, add_participant=True)
-result = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
+# result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
 print(RenderTree(topic2.root_tree_pub_sub))
 print(RenderTree(topic2.root_tree_publishers))
 print(RenderTree(topic2.root_tree_subscribers))
-print(result)
+print(result['add_participant'])
+print(result['delete_participant'])
+print(result['update_tree'])
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)
 # print(findall_by_attr(result_tree, "001")[0].name)

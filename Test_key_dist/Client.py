@@ -4,6 +4,8 @@ from .KeyManager import TestKeyManagerTopic
 from Participant import Participant
 import json
 import time
+import cryptography
+import os
 
 # global variables
 change_key_topics = list()
@@ -19,20 +21,23 @@ def on_subscribe(client, userdata, mid, granted_qos):
 def on_testing_initial_topic(client, userdata, msg):
     # authenticate the message -- check if it comes from key manager
     if authenticate_from_keymanager(msg) is True:
-        decrypt_message_symmetric(msg, userdata['pairwise_key'])
+        decrypted_msg = decrypt_message_symmetric(msg.payload, userdata['pairwise_key'])
         # make a global list to store keys or store this data somewhere
         # or make use of userdata
         global topic_decrypt_keys
         global change_key_topics
 
         print(msg.payload)
-        for topic in json.loads(msg.payload):
+        # for topic in json.loads(msg.payload):
+        for topic in json.loads(decrypted_msg.decode("utf-8", "ignore")):
             client.subscribe(topic=topic['topic_to_sub'], qos=1)
             print("subscribed to "+ topic['topic_to_sub'])
             # also store ancestor keys globally
             # to decode and encode messages accordingly
             change_key_topics.append(topic['topic_to_sub'])
-            topic_decrypt_keys.append(topic['enc_key'])
+            # topic_decrypt_keys.append(topic['enc_key'])
+            topic_decrypt_keys.append(bytes.fromhex(topic['enc_key']))
+
 
             # add callbacks for key change handling
             client.message_callback_add(topic['topic_to_sub'], on_message_key_change)
@@ -44,15 +49,21 @@ def on_testing_initial_topic_anc(client, userdata, msg):
     print("ancestors")
     if authenticate_from_keymanager(msg) is True:
         # use decrypted message after implementation
-        decrypt_message_symmetric(msg, userdata['pairwise_key'])
+        decrypted_msg = decrypt_message_symmetric(msg.payload, userdata['pairwise_key'])
         # make a global list to store keys or store this data somewhere
         # or make use of userdata
         global ancestors_keys
         global change_key_ancestors
 
-        for ancestor in json.loads(msg.payload):
+        # for ancestor in json.loads(msg.payload.decode("utf-8","ignore")):
+        for ancestor in json.loads(decrypted_msg.decode("utf-8", "ignore")):
             change_key_ancestors.append(ancestor['name'])
-            ancestors_keys.append(ancestor['key'])
+            if type(ancestor['key']) is dict:
+                # this for root key
+                ancestors_keys.append(ancestor['key'])
+            else:
+                # this for non - root keys
+                ancestors_keys.append(bytes.fromhex(ancestor['key']))
         print(change_key_ancestors)
         print(ancestors_keys)
 
@@ -65,14 +76,20 @@ def on_message_key_change(client, userdata, msg):
         global ancestors_keys
         global change_key_ancestors
         print(topic_decrypt_keys[change_key_topics.index(str(msg.topic))])
-        decrypt_message_symmetric(msg, topic_decrypt_keys[change_key_topics.index(str(msg.topic))])
+        decrypted_message = decrypt_message_symmetric(msg.payload, topic_decrypt_keys[change_key_topics.index(str(msg.topic))])
 
         # changing decryptkeys of topic
         if change_key_topics.index(str(msg.topic)) is not 0:
-            topic_decrypt_keys[change_key_topics.index(str(msg.topic))-1] = str(msg.payload) # use decrypted message later
+            # topic_decrypt_keys[change_key_topics.index(str(msg.topic))-1] = str(msg.payload.decode("utf-8","ignore")) # use decrypted message later
+            topic_decrypt_keys[change_key_topics.index(str(msg.topic)) - 1] = decrypted_message  # use decrypted message later
         print(topic_decrypt_keys)
         # changing ancestor list
-        ancestors_keys[change_key_ancestors.index(str(msg.topic).split('__')[2])] = str(msg.payload)
+        # ancestors_keys[change_key_ancestors.index(str(msg.topic).split('__')[2])] = str(msg.payload.decode("utf-8","ignore"))
+
+        if change_key_ancestors.index(str(msg.topic).split('__')[2]) is 0:
+            ancestors_keys[change_key_ancestors.index(str(msg.topic).split('__')[2])] = decrypted_message.decode("utf-8","ignore")
+        else:
+            ancestors_keys[change_key_ancestors.index(str(msg.topic).split('__')[2])] = decrypted_message
         print(ancestors_keys)
 
 
@@ -91,7 +108,8 @@ def authenticate_from_clients(mqtt_msg):
 
 
 def decrypt_message_symmetric(mqtt_msg, key):
-    pass
+    return cryptography.decrypt_aes(key, mqtt_msg)
+
 
 
 class ClientTopic:
@@ -139,7 +157,7 @@ class ClientTopic:
         testKeyManagerTopic.add_client(client_participant, self.permission, initial_topic, initial_topic_anc)
         # time.sleep(10)
         # testKeyManagerTopic.add_client(client_participant, self.permission, initial_topic, initial_topic_anc)
-        participant4 = Participant("12345", "004")
+        participant4 = Participant(os.urandom(16), "004")
 
         time.sleep(10)
 

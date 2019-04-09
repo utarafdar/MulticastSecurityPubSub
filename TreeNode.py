@@ -1,8 +1,10 @@
 import random
+import os
 
 
 def generate_key():
-    return random.randint(1000, 9999)
+    # return random.randint(1000, 9999)
+    return os.urandom(16)
 
 
 class TreeNode:

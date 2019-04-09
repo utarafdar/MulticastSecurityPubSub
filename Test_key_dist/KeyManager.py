@@ -10,7 +10,8 @@ import paho.mqtt.client as mqtt
 import json
 import copy
 import time
-
+import cryptography
+import os
 
 class TestKeyManagerTopic:
     def __init__(self, topic):
@@ -20,10 +21,10 @@ class TestKeyManagerTopic:
 
         topic = Topic(topic, type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value)
 
-        participant1 = Participant("12345", "001")
-        participant1_sibling = Participant("12345s", "001s")
-        participant2 = Participant("123456", "002")
-        participant3 = Participant("123457", "003")
+        participant1 = Participant(os.urandom(16), "001")
+        participant1_sibling = Participant(os.urandom(16), "001s")
+        participant2 = Participant(os.urandom(16), "002")
+        participant3 = Participant(os.urandom(16), "003")
 
         pub_tree_size = {'no_of_children': 2,
                          'depth': 3,
@@ -64,8 +65,15 @@ class TestKeyManagerTopic:
             update_msg_topic_name = self.topic.topicName + result['add_participant'][1]['tree_type'] + message['message_name']
             print(update_msg_topic_name)
             # todo -- encrypt here
-            msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
-            publisher_GCKS.publish(update_msg_topic_name, msg_updated_key)
+            # msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
+            # encrypting message
+            # if key type is dictionary, then convert to byte-type for enryption
+            if type(message['changed_parent_key']) is dict:
+                message_to_bytes = json.dumps(message['changed_parent_key'])
+            else:
+                message_to_bytes = message['changed_parent_key']
+            encrypted_message = cryptography.encrypt_aes(message['encryption_key'], message_to_bytes)
+            publisher_GCKS.publish(update_msg_topic_name, encrypted_message)
 
         for tree in result['update_tree']:
             for message in tree[0]:
@@ -73,7 +81,14 @@ class TestKeyManagerTopic:
                 # todo -- encrypt here
                 print(update_msg_topic_name)
                 msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
-                publisher_GCKS.publish(update_msg_topic_name, msg_updated_key)
+                # encrypting message
+                # if key type is dictionary, then convert to byte-type for enryption
+                if type(message['changed_parent_key']) is dict:
+                    message_to_bytes = json.dumps(message['changed_parent_key'])
+                else:
+                    message_to_bytes = message['changed_parent_key']
+                encrypted_message = cryptography.encrypt_aes(message['encryption_key'], message_to_bytes)
+                publisher_GCKS.publish(update_msg_topic_name, encrypted_message)
 
         # initial subscribing topics for the client newly added
 
@@ -102,27 +117,39 @@ class TestKeyManagerTopic:
         while i < len(ancestor_list):
             if ancestor_list[i].is_root is True:
                 ancestor_keys.append({'name': str(ancestor_list[i].tree_node.node_id),
+                                      # problem with json byte encoding
+                                      #'key': ancestor_list[i].tree_node.root_node_keys})
                                       'key': ancestor_list[i].tree_node.root_node_keys})
             else:
                 ancestor_keys.append({'name': str(ancestor_list[i].tree_node.node_id),
-                                      'key': ancestor_list[i].tree_node.node_key})
+                                      'key': ancestor_list[i].tree_node.node_key.hex()})
             if i != len(ancestor_list) - 1:
                 topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name +
                                                               str(ancestor_list[i].tree_node.node_id) + '/' +
                                                               str(ancestor_list[i + 1].tree_node.node_id) +
                                                               "__changeParent__" + str(ancestor_list[i].tree_node.node_id ),
-                                              'enc_key': ancestor_list[i + 1].tree_node.node_key})
+                                              # 'enc_key': ancestor_list[i + 1].tree_node.node_key})
+                                              # problem with json byte encoding
+                                              'enc_key': ancestor_list[i + 1].tree_node.node_key.hex()})
             else:
                 topic_to_sub_enc_keys.append({'topic_to_sub': self.topic.topicName + tree_type_name +
                                                               str(ancestor_list[i].tree_node.node_id) + '/' +
                                                               client.participant_id + "__changeParent__" +
                                                               str(ancestor_list[i].tree_node.node_id),
-                                              'enc_key': client.pairwise_key})
+                                               # 'enc_key': client.pairwise_key})
+                                              # problem with json byte encoding
+                                              'enc_key': client.pairwise_key.hex()})
             i = i + 1
+        print ("topic to sub ")
+        print (topic_to_sub_enc_keys)
         mqtt_msg = json.dumps(topic_to_sub_enc_keys)  # todo -- encrypt with participant1.pairwise_key
-        publisher_GCKS.publish(initial_topic, mqtt_msg)
+        # encrypt message
+        encrypted_message = cryptography.encrypt_aes(client.pairwise_key, mqtt_msg)
+        print(encrypted_message)
+        publisher_GCKS.publish(initial_topic, encrypted_message)
 
         time.sleep(5)
 
         mqtt_msg = json.dumps(ancestor_keys)  # todo -- encrypt with participant1.pairwise_key
-        publisher_GCKS.publish(initial_topic_anc, mqtt_msg)
+        encrypted_message = cryptography.encrypt_aes(client.pairwise_key, mqtt_msg)
+        publisher_GCKS.publish(initial_topic_anc, encrypted_message)

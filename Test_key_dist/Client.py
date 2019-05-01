@@ -6,6 +6,8 @@ import json
 import time
 import cryptography
 import os
+import nacl.utils
+
 
 # global variables
 change_key_topics = list()
@@ -20,14 +22,16 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 def on_testing_initial_topic(client, userdata, msg):
     # authenticate the message -- check if it comes from key manager
+    print("intial message")
+    print(msg.payload)
     if authenticate_from_keymanager(msg) is True:
         decrypted_msg = decrypt_message_symmetric(msg.payload, userdata['pairwise_key'])
         # make a global list to store keys or store this data somewhere
         # or make use of userdata
         global topic_decrypt_keys
         global change_key_topics
-
-        print(msg.payload)
+        print("initial message")
+        print(decrypted_msg)
         # for topic in json.loads(msg.payload):
         for topic in json.loads(decrypted_msg.decode("utf-8", "ignore")):
             client.subscribe(topic=topic['topic_to_sub'], qos=1)
@@ -91,6 +95,7 @@ def on_message_key_change(client, userdata, msg):
         else:
             ancestors_keys[change_key_ancestors.index(str(msg.topic).split('__')[2])] = decrypted_message
         print(ancestors_keys)
+        print("on message")
 
 
 
@@ -108,7 +113,7 @@ def authenticate_from_clients(mqtt_msg):
 
 
 def decrypt_message_symmetric(mqtt_msg, key):
-    return cryptography.decrypt_aes(key, mqtt_msg)
+    return cryptography.decrypt_secret_key(key, mqtt_msg)
 
 
 
@@ -117,6 +122,9 @@ class ClientTopic:
     def __init__(self, topic, permission):
         # assuming registration process gives the following data done
         # -- think -- send participant id to registration process?
+
+        # initialzing trees here
+        testKeyManagerTopic = TestKeyManagerTopic("topic1")
 
         reg_data = Registration.register(topic)
         self.participant_id = reg_data[1]
@@ -148,8 +156,8 @@ class ClientTopic:
 
         client.loop_start()
 
-        # initialzing trees here
-        testKeyManagerTopic = TestKeyManagerTopic("topic1")
+        time.sleep(5)
+
 
         # ideally registration protocol should add clients to GCKS,
         # since this is test we call add client here
@@ -157,9 +165,9 @@ class ClientTopic:
         testKeyManagerTopic.add_client(client_participant, self.permission, initial_topic, initial_topic_anc)
         # time.sleep(10)
         # testKeyManagerTopic.add_client(client_participant, self.permission, initial_topic, initial_topic_anc)
-        participant4 = Participant(os.urandom(16), "004")
+        participant4 = Participant(nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE), "004")
 
-        time.sleep(10)
+        time.sleep(15)
 
         testKeyManagerTopic.add_client(participant4, 3, "testTopic", "testTopicAnc")
         # client.loop_forever()

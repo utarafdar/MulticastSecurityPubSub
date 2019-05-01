@@ -1,10 +1,11 @@
 import random
 import os
-
+import nacl.utils
 
 def generate_key():
     # return random.randint(1000, 9999)
-    return os.urandom(16)
+    # return os.urandom(16)
+    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
 class TreeNode:

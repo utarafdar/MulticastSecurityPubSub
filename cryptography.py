@@ -91,14 +91,17 @@ pkbob = skbob.public_key
 
 # Alice does the same and then Alice and Bob exchange public keys
 skalice = PrivateKey.generate()
-pkalice = skalice.public_key"""
+pkalice = skalice.public_key
+
+print(skalice)
+print(pkalice)
 
 # Bob wishes to send Alice an encrypted message so Bob must make a Box with
 #   his private key and Alice's public key
 
 # This is our message to send, it must be a bytestring as Box will treat it
 #   as just a binary blob of data.
-"""message = b"Kill all humans"
+message = b"Kill all humans"
 
 enc_message = encrypt_public_key(pkalice, skbob, message)
 print(enc_message)

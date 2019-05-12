@@ -9,7 +9,7 @@ from LKH_Protocol import LKH
 import random
 import nacl.utils
 import nacl.secret
-
+from nacl.public import PrivateKey, Box
 
 def generate_key():
     return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
@@ -128,42 +128,41 @@ class KeyManager:
             # private key
             if pub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
-                # todo -- find an appropriate method to generate ECC public and private keys
-                publisher_public_key = generate_key()
-                publisher_private_key = generate_key()
+                publisher_private_key = PrivateKey.generate()
+                publisher_public_key = publisher_private_key.public_key
 
             if pub_tree_keys.subscriber_public_key is True:
                 # generate public private keys
-                subscriber_public_key = generate_key()
-                subscriber_private_key = generate_key()
+                subscriber_private_key = PrivateKey.generate()
+                subscriber_public_key = subscriber_private_key.public_key
 
         if sub_tree is True:
             if sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
-                # todo -- find an appropriate method to generate ECC public and private keys
                 if publisher_public_key is not None:
-                    publisher_public_key = generate_key()
-                    publisher_private_key = generate_key()
+                    publisher_private_key = PrivateKey.generate()
+                    publisher_public_key = publisher_private_key.public_key
 
             if sub_tree_keys.subscriber_public_key is True:
                 if subscriber_public_key is not None:
                     # generate public private keys
-                    subscriber_public_key = generate_key()
-                    subscriber_private_key = generate_key()
+                    subscriber_private_key = PrivateKey.generate()
+                    subscriber_public_key = subscriber_private_key.public_key
+
 
         if pub_sub_tree is True:
             if pub_sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
                 # todo -- find an appropriate method to generate ECC public and private keys
                 if publisher_public_key is not None:
-                    publisher_public_key = generate_key()
-                    publisher_private_key = generate_key()
+                    publisher_private_key = PrivateKey.generate()
+                    publisher_public_key = publisher_private_key.public_key
 
             if pub_sub_tree_keys.subscriber_public_key is True:
                 if subscriber_public_key is not None:
                     # generate public private keys
-                    subscriber_public_key = generate_key()
-                    subscriber_private_key = generate_key()
+                    subscriber_private_key = PrivateKey.generate()
+                    subscriber_public_key = subscriber_private_key.public_key
 
         if pub_tree is True:
             group_root_node_publishers = TreeNode('0', root_node=True)
@@ -363,8 +362,8 @@ class KeyManager:
                 return "error: invalid permissions"
             # first reset all the keys, depending on participant permissions set the tree updates
             common_keys_reset = generate_key()
-            publisher_public_key_reset = generate_key()
-            publisher_private_key_reset = generate_key()
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
             subscriber_keys_reset = {'common_key': common_keys_reset,
                                      'publisher_public_key': publisher_public_key_reset}
             pub_sub_keys_reset = {'common_key': common_keys_reset,
@@ -392,10 +391,13 @@ class KeyManager:
                                                  'changed_root_keys': pub_sub_keys_reset})
 
         elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
-
+            # common key symmetric
             common_keys_reset = generate_key()
-            publisher_public_key_reset = generate_key()
-            publisher_private_key_reset = generate_key()
+
+            # generating asymmetric keys
+
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
 
             pub_sub_keys_reset = {'common_key': common_keys_reset,
                                   'publisher_public_key': publisher_public_key_reset,
@@ -432,10 +434,11 @@ class KeyManager:
 
         elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
 
-            publisher_public_key_reset = generate_key()
-            publisher_private_key_reset = generate_key()
-            subscriber_public_key_reset = generate_key()
-            subscriber_private_key_reset = generate_key()
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
+
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
 
             subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
                                      'subscriber_public_key': subscriber_public_key_reset,
@@ -497,10 +500,11 @@ class KeyManager:
 
         elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
 
-            publisher_public_key_reset = generate_key()
-            publisher_private_key_reset = generate_key()
-            subscriber_public_key_reset = generate_key()
-            subscriber_private_key_reset = generate_key()
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
+
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
 
             subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
                                      'subscriber_public_key': subscriber_public_key_reset,
@@ -538,8 +542,8 @@ class KeyManager:
         elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
 
             common_keys_reset = generate_key()
-            subscriber_public_key_reset = generate_key()
-            subscriber_private_key_reset = generate_key()
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
 
             publisher_keys_reset = {'common_key': common_keys_reset,
                                     'subscriber_public_key': subscriber_public_key_reset}
@@ -565,8 +569,9 @@ class KeyManager:
         elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
 
             common_keys_reset = generate_key()
-            publisher_public_key_reset = generate_key()
-            publisher_private_key_reset = generate_key()
+
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
 
             subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
                                      'common_key': common_keys_reset}

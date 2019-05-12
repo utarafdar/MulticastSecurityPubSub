@@ -2,61 +2,64 @@ from TreeNode import TreeNode, LeafNode
 from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
+from Group import Group
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 from PublishSubscribeTreeKeys import PublishSubscribeTreeKeys
 from LKH_Protocol import LKH
 import random
+import nacl.utils
+import nacl.secret
 
 
 def generate_key():
-    return random.randrange(1000, 99999)
+    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 
 class KeyManager:
 
     @staticmethod
-    def setup_topic_trees(topic, participants_permissions=None, tree_sizes=None):
+    def setup_group_trees(group, participants_permissions=None, tree_sizes=None):
         # check for type of publish subscribe group  and proceed further
-        if topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+        if group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
             # call functions here
             # set publisher, subscriber and common trees based on the group
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=True,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=True,
                                                    pub_tree=False, sub_tree=False, pub_sub_tree=False)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=False)
             pub_sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                          publisher_private_key=False, subscriber_public_key=True,
                                                          subscriber_private_key=True)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False,
                                                    pub_tree=True, sub_tree=False, pub_sub_tree=True, pub_tree_keys=pub_tree_keys,
                                                    pub_sub_tree_keys=pub_sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
             pub_sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                          publisher_private_key=True, subscriber_public_key=False,
                                                          subscriber_private_key=False)
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=False,
                                                      subscriber_private_key=False)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False, pub_tree=False,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False, pub_tree=False,
                                                    sub_tree=True, pub_sub_tree=True, pub_sub_tree_keys=pub_sub_tree_keys,
                                                    sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=True, subscriber_public_key=True,
                                                      subscriber_private_key=False)
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=True)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
                                                    sub_tree=True, pub_tree_keys=pub_tree_keys, pub_sub_tree=False,
                                                    sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                      publisher_private_key=True, subscriber_public_key=True,
                                                      subscriber_private_key=False)
@@ -66,24 +69,24 @@ class KeyManager:
             pub_sub_tree_keys = PublishSubscribeTreeKeys(common_key=False, publisher_public_key=True,
                                                          publisher_private_key=True, subscriber_public_key=True,
                                                          subscriber_private_key=True)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
                                                    sub_tree=True, pub_tree_keys=pub_tree_keys, pub_sub_tree=True,
                                                    pub_sub_tree_keys=pub_sub_tree_keys, sub_tree_keys=sub_tree_keys)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
             # todo -- check this again
             pub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=False,
                                                      publisher_private_key=False, subscriber_public_key=True,
                                                      subscriber_private_key=False)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False, pub_tree=True,
                                                    sub_tree=False, pub_tree_keys=pub_tree_keys, pub_sub_tree=False,
                                                    sub_tree_keys=None)
 
-        elif topic.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
             sub_tree_keys = PublishSubscribeTreeKeys(common_key=True, publisher_public_key=True,
                                                      publisher_private_key=False, subscriber_public_key=False,
                                                      subscriber_private_key=False)
-            KeyManager.__setup_pub_sub_group_trees(topic, participants_permissions, tree_sizes, common_tree=False, pub_tree=False,
+            KeyManager.__setup_pub_sub_group_trees(group, participants_permissions, tree_sizes, common_tree=False, pub_tree=False,
                                                    sub_tree=True, pub_tree_keys=None, pub_sub_tree=False,
                                                    sub_tree_keys=sub_tree_keys)
 
@@ -93,7 +96,7 @@ class KeyManager:
     # In this method trees are created based on the type publisher-
     # -subscriber group
     @staticmethod
-    def __setup_pub_sub_group_trees(topic, participants_permissions=None, tree_sizes=None, pub_tree=None, sub_tree=None, common_tree=None,
+    def __setup_pub_sub_group_trees(group, participants_permissions=None, tree_sizes=None, pub_tree=None, sub_tree=None, common_tree=None,
                                     pub_tree_keys=None, sub_tree_keys=None, pub_sub_tree=None, pub_sub_tree_keys=None):
         # how to get permissions of individual participant?-receive a map of participant and permissions.
         # set keys in the tree node object
@@ -111,12 +114,12 @@ class KeyManager:
             return "error message"
 
         if common_tree is True:
-            topic_root_node_common = TreeNode('0', root_node=True)
+            group_root_node_common = TreeNode('0', root_node=True)
             group_key_common = {'common_key': generate_key()}
-            topic_root_node_common.set_root_node_keys(group_key_common)
+            group_root_node_common.set_root_node_keys(group_key_common)
             # check thorough
             # topic_root_node_common.node_id = group_key_common
-            topic.set_root_tree_common(topic_root_node_common)
+            group.set_root_tree_common(group_root_node_common)
             # call function next - not here, recheck
 
         # generate all the keys
@@ -163,7 +166,7 @@ class KeyManager:
                     subscriber_private_key = generate_key()
 
         if pub_tree is True:
-            topic_root_node_publishers = TreeNode('0', root_node=True)
+            group_root_node_publishers = TreeNode('0', root_node=True)
             if pub_tree_keys.publisher_public_key is True:
                 group_key_publishers['publisher_public_key'] = publisher_public_key
 
@@ -179,11 +182,11 @@ class KeyManager:
             if pub_tree_keys.common_key is True:
                 group_key_subscribers['common_group_key'] = group_key_common
 
-            topic_root_node_publishers.set_root_node_keys(group_key_publishers)
-            topic.set_root_tree_publishers(topic_root_node_publishers)  # also try to set the depth and no. children
+            group_root_node_publishers.set_root_node_keys(group_key_publishers)
+            group.set_root_tree_publishers(group_root_node_publishers)  # also try to set the depth and no. children
 
         if sub_tree is True:
-            topic_root_node_subscribers = TreeNode('0', root_node=True)
+            group_root_node_subscribers = TreeNode('0', root_node=True)
             if sub_tree_keys.publisher_public_key is True:
                 group_key_subscribers['publisher_public_key'] = publisher_public_key
 
@@ -199,11 +202,11 @@ class KeyManager:
             if sub_tree_keys.common_key is True:
                 group_key_subscribers['common_group_key'] = group_key_common
 
-            topic_root_node_subscribers.set_root_node_keys(group_key_subscribers)
-            topic.set_root_tree_subscribers(topic_root_node_subscribers)
+            group_root_node_subscribers.set_root_node_keys(group_key_subscribers)
+            group.set_root_tree_subscribers(group_root_node_subscribers)
 
         if pub_sub_tree is True:
-            topic_root_node_pub_sub = TreeNode('0', root_node=True)
+            group_root_node_pub_sub = TreeNode('0', root_node=True)
             if pub_sub_tree_keys.publisher_public_key is True:
                 group_key_pub_sub['publisher_public_key'] = publisher_public_key
 
@@ -219,17 +222,17 @@ class KeyManager:
             if pub_sub_tree_keys.common_key is True:
                 group_key_pub_sub['common_group_key'] = group_key_common
 
-            topic_root_node_pub_sub.set_root_node_keys(group_key_pub_sub)
-            topic.set_root_tree_pub_sub(topic_root_node_pub_sub)
+            group_root_node_pub_sub.set_root_node_keys(group_key_pub_sub)
+            group.set_root_tree_pub_sub(group_root_node_pub_sub)
 
         # handle edge cases single publisher or subscriber key
-        if topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
-            topic.edge_case_one_publisher_keys = {'common_key': group_key_common,
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+            group.edge_case_one_publisher_keys = {'common_key': group_key_common,
                                                   'publisher_public_key': publisher_public_key,
                                                   'publisher_private_key': publisher_private_key
                                                   }
-        if topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
-            topic.edge_case_one_subscriber_keys = {'common_key': group_key_common,
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+            group.edge_case_one_subscriber_keys = {'common_key': group_key_common,
                                                    'subscriber_public_key': subscriber_public_key,
                                                    'subscriber_private_key': subscriber_private_key
                                                    }
@@ -266,7 +269,7 @@ class KeyManager:
         subscribe_tree_participants = []
         pub_sub_tree_participants = []
 
-        if topic.root_tree_common is not None:
+        if group.root_tree_common is not None:
             participants = []
             # optimization to make tree scalable
             if participants_permissions is None:
@@ -274,13 +277,14 @@ class KeyManager:
             # optimization to make tree scalable
             else:
                 for participant in participants_permissions:
-                    participant[0].add_topic(topic, participant[1])
+                    participant[0].add_group(group, participant[1])
                     participants.append(participant[0])
+                    group.add_participant(participant[0], participant[1])
 
             if common_tree_depth is None or common_tree_no_children is None:
                 return "error: tree size not specified"
 
-            LKH.generate_tree(topic.root_tree_common, common_tree_depth, common_tree_no_children, participants)
+            LKH.generate_tree(group.root_tree_common, common_tree_depth, common_tree_no_children, participants)
 
                 # otherwise segregate the participants
         else:
@@ -293,35 +297,38 @@ class KeyManager:
             else:
                 for participant in participants_permissions:
                     if participant[1] is PermissionTypesEnum.PUBLISH.value:
-                        participant[0].add_topic(topic, participant[1])
+                        participant[0].add_group(group, participant[1])
                         publish_tree_participants.append(participant[0])
                     if participant[1] is PermissionTypesEnum.SUBSCRIBE.value:
-                        participant[0].add_topic(topic, participant[1])
+                        participant[0].add_group(group, participant[1])
                         subscribe_tree_participants.append(participant[0])
                     if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
-                        participant[0].add_topic(topic, participant[1])
+                        participant[0].add_group(group, participant[1])
                         pub_sub_tree_participants.append(participant[0])
 
-        if topic.root_tree_publishers is not None:
+                    # add participant to the group data structure
+                    group.add_participant(participant[0], participant[1])
+
+        if group.root_tree_publishers is not None:
 
             # if pub_tree_depth is None or pub_tree_no_children is None:
                 # return "error: tree size not specified"
 
-            LKH.generate_tree(topic.root_tree_publishers, pub_tree_depth, pub_tree_no_children, participants=publish_tree_participants)
+            LKH.generate_tree(group.root_tree_publishers, pub_tree_depth, pub_tree_no_children, participants=publish_tree_participants)
 
-        if topic.root_tree_subscribers is not None:
+        if group.root_tree_subscribers is not None:
 
             # if sub_tree_depth is None or sub_tree_no_children is None:
                 # return "error: tree size not specified"
 
-            LKH.generate_tree(topic.root_tree_subscribers, sub_tree_depth, sub_tree_no_children, participants=subscribe_tree_participants)
+            LKH.generate_tree(group.root_tree_subscribers, sub_tree_depth, sub_tree_no_children, participants=subscribe_tree_participants)
 
-        if topic.root_tree_pub_sub is not None:
+        if group.root_tree_pub_sub is not None:
 
             # if pub_sub_tree_depth is None or pub_sub_tree_no_children is None:
                 # return "error: tree size not specified"
 
-            LKH.generate_tree(topic.root_tree_pub_sub, pub_sub_tree_depth, pub_sub_tree_no_children, participants=pub_sub_tree_participants)
+            LKH.generate_tree(group.root_tree_pub_sub, pub_sub_tree_depth, pub_sub_tree_no_children, participants=pub_sub_tree_participants)
 
         # call function here to generate the tree
         # set topic and permissions for the participants (do not forget)
@@ -329,7 +336,7 @@ class KeyManager:
         # check if pub and sub trees are not none and add participants to the trees accordingly
 
     @staticmethod
-    def add_or_delete_participant(topic, participant, participant_permission, add_participant=False,
+    def add_or_delete_participant(group, participant, participant_permission, add_participant=False,
                                   delete_participant=False):
         # check if add or delete parameter is there
         if add_participant is False and delete_participant is False:
@@ -343,15 +350,15 @@ class KeyManager:
         # here we set all the required data (keys) to be updated after adding the participant
         trees_data_to_be_updated = []
 
-        if topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
             # set the keys to be changed here
             common_keys_reset = {'common_key': generate_key()}
-            trees_data_to_be_updated.append({'tree': topic.root_tree_common,
+            trees_data_to_be_updated.append({'tree': group.root_tree_common,
                                              'add_participant': add_participant,
                                              'delete_participant': delete_participant,
                                              'changed_root_keys': common_keys_reset})
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
             if participant_permission is PermissionTypesEnum.PUBLISH:
                 return "error: invalid permissions"
             # first reset all the keys, depending on participant permissions set the tree updates
@@ -365,26 +372,26 @@ class KeyManager:
                                   'publisher_private_key': publisher_private_key_reset}
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': subscriber_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': pub_sub_keys_reset})
 
             if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': subscriber_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': pub_sub_keys_reset})
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
 
             common_keys_reset = generate_key()
             publisher_public_key_reset = generate_key()
@@ -403,27 +410,27 @@ class KeyManager:
 
             if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': pub_sub_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': publisher_keys_reset})
 
             if participant_permission is PermissionTypesEnum.PUBLISH.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': pub_sub_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': publisher_keys_reset})
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
 
             publisher_public_key_reset = generate_key()
             publisher_private_key_reset = generate_key()
@@ -445,50 +452,50 @@ class KeyManager:
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': subscriber_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': pub_sub_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': publisher_keys_reset})
 
             if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': subscriber_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': pub_sub_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': publisher_keys_reset})
 
             if participant_permission is PermissionTypesEnum.PUBLISH.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': subscriber_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_pub_sub,
+                trees_data_to_be_updated.append({'tree': group.root_tree_pub_sub,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': pub_sub_keys_reset})
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': publisher_keys_reset})
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
 
             publisher_public_key_reset = generate_key()
             publisher_private_key_reset = generate_key()
@@ -504,12 +511,12 @@ class KeyManager:
                                     'subscriber_public_key': subscriber_public_key_reset}
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': subscriber_keys_reset})
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': publisher_keys_reset})
@@ -518,17 +525,17 @@ class KeyManager:
                 return "error: invalid permissions"
 
             if participant_permission is PermissionTypesEnum.PUBLISH.value:
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': False,
                                                  'delete_participant': False,
                                                  'changed_root_keys': subscriber_keys_reset})
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': publisher_keys_reset})
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
 
             common_keys_reset = generate_key()
             subscriber_public_key_reset = generate_key()
@@ -545,7 +552,7 @@ class KeyManager:
 
             if participant_permission is PermissionTypesEnum.PUBLISH.value:
 
-                trees_data_to_be_updated.append({'tree': topic.root_tree_publishers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_publishers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': publisher_keys_reset})
@@ -553,9 +560,9 @@ class KeyManager:
                                          'publisher_public_key': subscriber_public_key_reset,
                                          'publisher_private_key': subscriber_private_key_reset
                                         }
-            topic.edge_case_one_publisher_keys = edge_case_subscriber_keys.copy()
+            group.edge_case_one_publisher_keys = edge_case_subscriber_keys.copy()
 
-        elif topic.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+        elif group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
 
             common_keys_reset = generate_key()
             publisher_public_key_reset = generate_key()
@@ -565,7 +572,7 @@ class KeyManager:
                                      'common_key': common_keys_reset}
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
-                trees_data_to_be_updated.append({'tree': topic.root_tree_subscribers,
+                trees_data_to_be_updated.append({'tree': group.root_tree_subscribers,
                                                  'add_participant': add_participant,
                                                  'delete_participant': delete_participant,
                                                  'changed_root_keys': subscriber_keys_reset})
@@ -581,7 +588,7 @@ class KeyManager:
                                         'publisher_public_key': publisher_public_key_reset,
                                         'publisher_private_key': publisher_private_key_reset
                                                   }
-            topic.edge_case_one_publisher_keys = edge_case_publisher_keys.copy()
+            group.edge_case_one_publisher_keys = edge_case_publisher_keys.copy()
 
         add_participant_data = dict()
         delete_participant_data = dict()
@@ -591,33 +598,36 @@ class KeyManager:
 
         for trees_data in trees_data_to_be_updated:
             if trees_data['add_participant'] is True:
-                participant.add_topic(topic, participant_permission)
+                #todo check if duplicate
+                participant.add_group(group, participant_permission)
+                group.add_participant(participant, participant_permission)
                 message = LKH.add_participant(trees_data['tree'], participant,
                                               changed_root_keys=trees_data['changed_root_keys'])
                 tree_type = ''
-                if trees_data['tree'] == topic.root_tree_publishers:
+                if trees_data['tree'] == group.root_tree_publishers:
                     tree_type = 'pub'
-                if trees_data['tree'] == topic.root_tree_subscribers:
+                if trees_data['tree'] == group.root_tree_subscribers:
                     tree_type = 'sub'
-                if trees_data['tree'] == topic.root_tree_pub_sub:
+                if trees_data['tree'] == group.root_tree_pub_sub:
                     tree_type = 'pub_sub'
-                if trees_data['tree'] == topic.root_tree_common:
+                if trees_data['tree'] == group.root_tree_common:
                     tree_type = 'common'
 
                 add_participant_data = (message[2], {'tree_type': tree_type})
 
             if trees_data['delete_participant'] is True:
-                participant.delete_topic(topic)
+                participant.delete_group(group)
+                group.delete_participant(participant)
                 message3 = LKH.delete_participant(trees_data['tree'], participant,
                                                   changed_root_keys=trees_data['changed_root_keys'])
                 tree_type = ''
-                if trees_data['tree'] == topic.root_tree_publishers:
+                if trees_data['tree'] == group.root_tree_publishers:
                     tree_type = 'pub'
-                if trees_data['tree'] == topic.root_tree_subscribers:
+                if trees_data['tree'] == group.root_tree_subscribers:
                     tree_type = 'sub'
-                if trees_data['tree'] == topic.root_tree_pub_sub:
+                if trees_data['tree'] == group.root_tree_pub_sub:
                     tree_type = 'pub_sub'
-                if trees_data['tree'] == topic.root_tree_common:
+                if trees_data['tree'] == group.root_tree_common:
                     tree_type = 'common'
 
                 delete_participant_data = (message3[2], {'tree_type': tree_type})
@@ -626,13 +636,13 @@ class KeyManager:
                 message2 = LKH.update_tree_root_keys(trees_data['tree'],
                                                      changed_root_keys=trees_data['changed_root_keys'])
                 tree_type = ''
-                if trees_data['tree'] == topic.root_tree_publishers:
+                if trees_data['tree'] == group.root_tree_publishers:
                     tree_type = 'pub'
-                if trees_data['tree'] == topic.root_tree_subscribers:
+                if trees_data['tree'] == group.root_tree_subscribers:
                     tree_type = 'sub'
-                if trees_data['tree'] == topic.root_tree_pub_sub:
+                if trees_data['tree'] == group.root_tree_pub_sub:
                     tree_type = 'pub_sub'
-                if trees_data['tree'] == topic.root_tree_common:
+                if trees_data['tree'] == group.root_tree_common:
                     tree_type = 'common'
 
                 update_tree_data.append((message2[1], {'tree_type': tree_type}))

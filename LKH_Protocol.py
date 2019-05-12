@@ -2,6 +2,7 @@ from TreeNode import TreeNode, LeafNode
 from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
+from Group import Group
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 import random
 
@@ -80,11 +81,11 @@ class LKH:
 
     # changes needed -- todo--
     @staticmethod
-    def get_ancestors_all_participants(topic):
+    def get_ancestors_all_participants(group):
         children_list = []
         ancestors_list = []
         # loop through children
-        for node in PreOrderIter(topic.root_tree):
+        for node in PreOrderIter(group.root_tree):
             # node = Node(node)
             # check if value not equal to empty
             if node.is_leaf and node.name != "empty":
@@ -360,10 +361,11 @@ class LKH:
         return parent_node, id_to_node
 
     # handle error conditions
+    # this should not be here
     @staticmethod
-    def __is_allowed_permission(topic_pub_sub_group_type, participant_permission):
+    def __is_allowed_permission(group_pub_sub_group_type, participant_permission):
 
-        if topic_pub_sub_group_type is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+        if group_pub_sub_group_type is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                 return False
             elif participant_permission is PermissionTypesEnum.PUBLISH.value:
@@ -371,19 +373,19 @@ class LKH:
             else:
                 return True
 
-        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
+        elif group_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB:
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                 return False
             else:
                 return True
 
-        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
+        elif group_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB:
             if participant_permission is PermissionTypesEnum.PUBLISH.value:
                 return False
             else:
                 return True
 
-        elif topic_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
+        elif group_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB or group_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
             if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                 return False
             else:

@@ -1,6 +1,7 @@
 from LKH_Protocol import LKH
 from Participant import Participant
 from Topic import Topic
+from Group import Group
 from anytree.exporter import JsonExporter
 from TreeNode import TreeNode
 from anytree import Node, RenderTree, findall_by_attr, findall, Resolver
@@ -29,7 +30,7 @@ participants_permissions = [(participant1, 3), (participant2, 3), (participant3,
 
 
 topic = Topic("test")
-print(topic.type_of_pub_sub_group.value)
+# print(topic.type_of_pub_sub_group.value)
 
 #result_tree = test_lkh.setup_topic_trees(topic, participants,TypeOfPubSubGroupEnum=1)
 #result_tree = test_lkh.setup_tree_with_participants(topic)
@@ -37,7 +38,7 @@ print(topic.type_of_pub_sub_group.value)
 #test_lkh.setup_topic_trees(topic, participants_permissions)
 #print(RenderTree(topic.root_tree_common))
 
-topic2 = Topic("test", type_of_pub_sub_group=TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value)
+topic2 = Topic("test")
 
 # some method to calculate tree sizes
 common_tree_size = {'no_of_children': 2,
@@ -60,22 +61,28 @@ tree_sizes = [common_tree_size, pub_tree_size, sub_tree_size, pub_sub_tree_size]
 participants_permissions2 = [(participant1, 1), (participant2, 2), (participant3, 3)]
 
 # tree optimization testing
-KeyManager.setup_topic_trees(topic2)
+#KeyManager.setup_topic_trees(topic2)
 
 
 #KeyManager.setup_topic_trees(topic2, participants_permissions2, tree_sizes)
 
 participant4 = Participant("12345", "004")
 
-KeyManager.add_or_delete_participant(topic2, Participant("12345", "001"), 3, add_participant=True)
-KeyManager.add_or_delete_participant(topic2, Participant("12345", "002"), 3, add_participant=True)
-KeyManager.add_or_delete_participant(topic2, Participant("12345", "003"), 3, add_participant=True)
+# testing with groups
+group1 = Group("group1", type_of_pub_sub_group=4)
+group1.add_topic(topic)
+group1.add_topic(topic2)
+KeyManager.setup_group_trees(group1)
+
+KeyManager.add_or_delete_participant(group1, Participant("12345", "001"), 3, add_participant=True)
+KeyManager.add_or_delete_participant(group1, Participant("12345", "002"), 3, add_participant=True)
+KeyManager.add_or_delete_participant(group1, Participant("12345", "003"), 3, add_participant=True)
 
 # opyimiztion test
-print(RenderTree(topic2.root_tree_publishers))
+print(RenderTree(group1.root_tree_publishers))
 #print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
-print(RenderTree(topic2.root_tree_subscribers))
-print(RenderTree(topic2.root_tree_pub_sub))
+print(RenderTree(group1.root_tree_subscribers))
+print(RenderTree(group1.root_tree_pub_sub))
 
 # result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
 

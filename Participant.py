@@ -5,24 +5,24 @@ class Participant:
     def __init__(self, pairwise_key, participant_id):
         self.pairwise_key = pairwise_key
         self.participant_id = participant_id
-        self.topics = []
-        self.topic_id_user_permissions_dict = {}
+        self.groups = []
+        self.group_id_user_permissions_dict = {}
 
-    def add_topic(self, topic, participant_permissions):
+    def add_group(self, group, participant_permissions):
         # need to include logic for tree arrays
         # also add message names to subscribe in case of participant leave/join
-        self.topics.append(topic)
-        self.topic_id_user_permissions_dict.update({topic.id: participant_permissions})
+        self.groups.append(group)
+        self.group_id_user_permissions_dict.update({group.id: participant_permissions})
 
-    def delete_topic(self, topic):
+    def delete_group(self, group):
         # need to include logic for tree arrays
-        del self.topic_id_user_permissions_dict[topic.id]
-        self.topics.remove(topic)
+        del self.group_id_user_permissions_dict[group.id]
+        self.groups.remove(group)
 
-    def get_message_names_topic(self, topic):
+    def get_message_names_topic(self, group):
         message_names_to_sub = []
         # add messages for ancestors
-        participant_node = findall_by_attr(topic.root_tree, str(self.participant_id))[0]
+        participant_node = findall_by_attr(group.root_tree, str(self.participant_id))[0]
         message_name = str(participant_node.parent.tree_node.node_id) + "/" + str(participant_node.leaf_node.node_id)
         message_names_to_sub.append(message_name)
         ancestors = participant_node.ancestors

@@ -1,6 +1,8 @@
 import random
 import os
 import nacl.utils
+import nacl.secret
+
 
 def generate_key():
     # return random.randint(1000, 9999)

@@ -14,21 +14,20 @@ def generate_key():
 
 class LKH:
     @staticmethod
+    def create_tree(tree_root, degree_of_tree):
+        for degree in range(degree_of_tree):
+            pass
+
+        pass
+
+
+    @staticmethod
     def generate_tree(tree_root, depth, no_of_children, participants=None):
         # todo -- check how to pass depth and no of children automatically and by arguments
         # height and depth not fitting number of a participants
         if not (participants is None):
             if len(participants) > no_of_children ** (depth - 1):
                 return "error message"  # todo -- customize the error message
-        # optimization to scale tree
-        if depth is None and no_of_children is None and participants is None:
-            depth = 1
-            no_of_children = 2
-        elif depth is None and no_of_children is None and participants is not None:
-            # or set up tree size
-            return "error specify size"
-        else:
-            pass
 
         current_parents = [tree_root]
         node_count = 1
@@ -46,10 +45,6 @@ class LKH:
             temp_parent.clear()
 
         if participants is None:
-            for leaf in current_parents:
-                Node("empty", parent=leaf.parent, leaf_node=LeafNode(leaf.tree_node.node_id))
-                leaf.parent = None
-                leaf.tree_node = None
             return tree_root, current_parents, node_count
 
         ################################################################
@@ -96,107 +91,60 @@ class LKH:
     @staticmethod
     def add_participant(tree_root, participant, changed_root_keys=None):
 
-        empty_nodes = findall_by_attr(tree_root, "empty")
-        if len(empty_nodes) is 0:
-            # tree structure change --
-            # get all the leaf nodes and maximum node id
-            leaf_nodes = tree_root.leaves
-            last_node_id = int(leaf_nodes[len(leaf_nodes)-1].leaf_node.node_id)
-            participant_counter = 0
-            added_participant = None
-            message_details_dict_list = []
-            # change tree structure
-            # children_node = TreeNode(node_count)
-            # children_tree_node = Node(str(node_count), parent=parent, tree_node=children_node)
-            for leaf in leaf_nodes:
-                new_parent_tree_node = TreeNode(leaf.leaf_node.node_id)
-                new_parent = Node(leaf.leaf_node.node_id, parent=leaf.parent, tree_node=new_parent_tree_node)
-                # two children for this node -- or todo no of children of this root_tree --
-                # 1st child has the same participant and the second child is empty
-                last_node_id += 1
-                leaf.leaf_node.name = str(last_node_id)
-                leaf.parent = new_parent
-                # send the changed structure message only to the participants affected
-                # newly added participant messages will be handled by registration protocol not here
+        empty_node = findall_by_attr(tree_root, "empty")[0]
+        # participant.add_topic(topic)  # include code for user-permissions  # or better move this to top
+        new_leaf_node = LeafNode(empty_node.leaf_node.node_id, participant)
+        added_participant = Node(participant.participant_id, parent=empty_node.parent, leaf_node=new_leaf_node)
+        # dis-allocate the old empty node after attaching the new one to the tree
+        empty_node.parent = None
+        empty_node.leaf_node = None
 
-                message_detail = {
-                    "message_name": "change_tree_structure" + "/" + leaf.name,
-                    "encryption_key": leaf.leaf_node.participant.pairwise_key,
-                    "new_ancestor_key": new_parent.tree_node.node_key}
+        # find ancestors of the added participant and change their keys
+        ancestor_list = added_participant.ancestors
+        for ancestor in ancestor_list:
+            if ancestor.is_root and changed_root_keys is not None:
+                ancestor.tree_node.root_node_keys = changed_root_keys.copy()
+            else:
+                ancestor.tree_node.reset_key()
+            # change the keys of root node here
+
+        # code to add details about the messages to be sent
+        # first construct messages for participant and its siblings
+        message_details_dict_list = []
+        # adding message for the newly added participant to be decided based on other implementations
+        # todo
+        """message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
+                          "encryption_key": added_participant.leaf_node.participant.pairwise_key,
+                          "changed_parent_key": added_participant.parent.tree_node.node_key}
+        message_details_dict_list.append(message_detail)"""
+        siblings = added_participant.siblings
+        for sibling in siblings:
+            if sibling.leaf_node.participant is not None:
+                message_detail = {# "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
+                                  "message_name": str(sibling.parent.tree_node.node_id) + "/" +
+                                                  str(sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
+                                  "encryption_key": sibling.leaf_node.participant.pairwise_key,
+                                  "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)
 
-                # first check if the participant is already added
-                if participant_counter is 0:
-                    # add new participant here
-                    last_node_id += 1
-                    new_leaf_node = LeafNode(str(last_node_id), participant)
-                    added_participant = Node(participant.participant_id, parent=new_parent, leaf_node=new_leaf_node)
-                    participant_counter = 1
-
-                else:  # add empty node else
-                    # if participant is already added 2nd child empty
-                    # Node("empty", parent=leaf_nodes[p].parent, leaf_node=LeafNode(leaf_nodes[p].tree_node.node_id))
-                    last_node_id += 1
-                    Node("empty", parent=new_parent, leaf_node=LeafNode(str(last_node_id)))
-
-            return tree_root, added_participant, message_details_dict_list
-
-        else:
-
-            empty_node = empty_nodes[0]
-            # participant.add_topic(topic)  # include code for user-permissions  # or better move this to top
-            new_leaf_node = LeafNode(empty_node.leaf_node.node_id, participant)
-            added_participant = Node(participant.participant_id, parent=empty_node.parent, leaf_node=new_leaf_node)
-            # dis-allocate the old empty node after attaching the new one to the tree
-            empty_node.parent = None
-            empty_node.leaf_node = None
-
-            # find ancestors of the added participant and change their keys
-            ancestor_list = added_participant.ancestors
-            for ancestor in ancestor_list:
-                if ancestor.is_root and changed_root_keys is not None:
-                    ancestor.tree_node.root_node_keys = changed_root_keys.copy()
+        # construct messages for ancestors and their siblings
+        for ancestor in range(len(ancestor_list)-2, -1, -1):
+            children = ancestor_list[ancestor].children
+            for child in children:
+                message_detail = {
+                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id) +
+                                    "__changeParent__" + str(child.parent.tree_node.node_id),
+                    "encryption_key": child.tree_node.node_key}
+                if child.parent.is_root and changed_root_keys is not None:
+                    message_detail["changed_parent_key"] = child.parent.tree_node.root_node_keys
                 else:
-                    ancestor.tree_node.reset_key()
-                # change the keys of root node here
+                    message_detail["changed_parent_key"] = child.parent.tree_node.node_key
+                # "changed_parent_key": child.parent.tree_node.node_key}
+                # if last i.e. root node then encryption keys is the list of changed pub-sub keys
+                # add that condition for the last one. when ancestor = 0 basically.
+                message_details_dict_list.append(message_detail)
 
-            # code to add details about the messages to be sent
-            # first construct messages for participant and its siblings
-            message_details_dict_list = []
-            # adding message for the newly added participant to be decided based on other implementations
-            # todo
-            """message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
-                              "encryption_key": added_participant.leaf_node.participant.pairwise_key,
-                              "changed_parent_key": added_participant.parent.tree_node.node_key}
-            message_details_dict_list.append(message_detail)"""
-            siblings = added_participant.siblings
-            for sibling in siblings:
-                if sibling.leaf_node.participant is not None:
-                    message_detail = {# "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
-                                      "message_name": str(sibling.parent.tree_node.node_id) + "/" +
-                                                      str(sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
-                                      "encryption_key": sibling.leaf_node.participant.pairwise_key,
-                                      "changed_parent_key": sibling.parent.tree_node.node_key}
-                    message_details_dict_list.append(message_detail)
-
-            # construct messages for ancestors and their siblings
-            for ancestor in range(len(ancestor_list)-2, -1, -1):
-                children = ancestor_list[ancestor].children
-                for child in children:
-                    message_detail = {
-                        "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id) +
-                                        "__changeParent__" + str(child.parent.tree_node.node_id),
-                        "encryption_key": child.tree_node.node_key}
-                    if child.parent.is_root and changed_root_keys is not None:
-                        message_detail["changed_parent_key"] = child.parent.tree_node.root_node_keys
-                    else:
-                        message_detail["changed_parent_key"] = child.parent.tree_node.node_key
-                    # "changed_parent_key": child.parent.tree_node.node_key}
-                    # if last i.e. root node then encryption keys is the list of changed pub-sub keys
-                    # add that condition for the last one. when ancestor = 0 basically.
-                    message_details_dict_list.append(message_detail)
-
-            return tree_root, added_participant, message_details_dict_list
+        return tree_root, added_participant, message_details_dict_list
 
     @staticmethod
     def delete_participant(tree_root, participant, changed_root_keys=None):
@@ -260,21 +208,12 @@ class LKH:
         tree_root.tree_node.root_node_keys = changed_root_keys.copy()
         children = tree_root.children
 
-        if tree_root.height is 1:
-            for child in children:
-                if child.name is not "empty":
-                    message_detail = {
-                        "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.leaf_node.node_id),
-                        "encryption_key": child.leaf_node.participant.pairwise_key,
-                        "changed_parent_key": child.parent.tree_node.root_node_keys}
-                    message_details_dict_list.append(message_detail)
-        else:
-            for child in children:
-                message_detail = {
-                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
-                    "encryption_key": child.tree_node.node_key,
-                    "changed_parent_key": child.parent.tree_node.root_node_keys}
-                message_details_dict_list.append(message_detail)
+        for child in children:
+            message_detail = {
+                "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
+                "encryption_key": child.tree_node.node_key,
+                "changed_parent_key": child.parent.tree_node.root_node_keys}
+            message_details_dict_list.append(message_detail)
 
         return tree_root, message_details_dict_list
 

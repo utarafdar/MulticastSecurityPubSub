@@ -58,20 +58,33 @@ pub_sub_tree_size = {'no_of_children': 2,
 tree_sizes = [common_tree_size, pub_tree_size, sub_tree_size, pub_sub_tree_size]
 
 participants_permissions2 = [(participant1, 1), (participant2, 2), (participant3, 3)]
-KeyManager.setup_topic_trees(topic2, participants_permissions2, tree_sizes)
-#print(RenderTree(topic2.root_tree_publishers))
-#print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
-#print(RenderTree(topic2.root_tree_subscribers))
-#print(RenderTree(topic2.root_tree_pub_sub))
+
+# tree optimization testing
+KeyManager.setup_topic_trees(topic2)
+
+
+#KeyManager.setup_topic_trees(topic2, participants_permissions2, tree_sizes)
+
 participant4 = Participant("12345", "004")
-result = KeyManager.add_or_delete_participant(topic2, participant4, 3, add_participant=True)
-# result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
-print(RenderTree(topic2.root_tree_pub_sub))
+
+KeyManager.add_or_delete_participant(topic2, Participant("12345", "001"), 3, add_participant=True)
+KeyManager.add_or_delete_participant(topic2, Participant("12345", "002"), 3, add_participant=True)
+KeyManager.add_or_delete_participant(topic2, Participant("12345", "003"), 3, add_participant=True)
+
+# opyimiztion test
 print(RenderTree(topic2.root_tree_publishers))
+#print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
 print(RenderTree(topic2.root_tree_subscribers))
-print(result['add_participant'])
-print(result['delete_participant'])
-print(result['update_tree'])
+print(RenderTree(topic2.root_tree_pub_sub))
+
+# result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
+
+#print(RenderTree(topic2.root_tree_pub_sub))
+#print(RenderTree(topic2.root_tree_publishers))
+#print(RenderTree(topic2.root_tree_subscribers))
+#print(result['add_participant'])
+#print(result['delete_participant'])
+#print(result['update_tree'])
 #
 # print(findall_by_attr(result_tree, "001")[0].leaf_node.participant.pairwise_key)
 # print(findall_by_attr(result_tree, "001")[0].name)
@@ -118,8 +131,8 @@ print(result['update_tree'])
 # exporter = JsonExporter(indent=2, sort_keys=True)
 # print(exporter.export(res))
 
-json_res = test_lkh.convert_tree_to_json(topic)
-print(json_res)
-print(RenderTree(test_lkh.tree_from_json(json_res)[0]))
-print(test_lkh.tree_from_json(json_res)[1])
+#json_res = test_lkh.convert_tree_to_json(topic)
+#print(json_res)
+#print(RenderTree(test_lkh.tree_from_json(json_res)[0]))
+#print(test_lkh.tree_from_json(json_res)[1])
 # print(resl[""])

@@ -245,19 +245,20 @@ class KeyManager:
         pub_sub_tree_depth = None
         common_tree_depth = None
 
-        for tree_size in tree_sizes:
-            if tree_size['tree_type'] is 'pub':
-                pub_tree_no_children = tree_size['no_of_children']
-                pub_tree_depth = tree_size['depth']
-            if tree_size['tree_type'] is 'sub':
-                sub_tree_no_children = tree_size['no_of_children']
-                sub_tree_depth = tree_size['depth']
-            if tree_size['tree_type'] is 'pub_sub':
-                pub_sub_tree_no_children = tree_size['no_of_children']
-                pub_sub_tree_depth = tree_size['depth']
-            if tree_size['tree_type'] is 'common':
-                common_tree_no_children = tree_size['no_of_children']
-                common_tree_depth = tree_size['depth']
+        if tree_sizes is not None:
+            for tree_size in tree_sizes:
+                if tree_size['tree_type'] is 'pub':
+                    pub_tree_no_children = tree_size['no_of_children']
+                    pub_tree_depth = tree_size['depth']
+                if tree_size['tree_type'] is 'sub':
+                    sub_tree_no_children = tree_size['no_of_children']
+                    sub_tree_depth = tree_size['depth']
+                if tree_size['tree_type'] is 'pub_sub':
+                    pub_sub_tree_no_children = tree_size['no_of_children']
+                    pub_sub_tree_depth = tree_size['depth']
+                if tree_size['tree_type'] is 'common':
+                    common_tree_no_children = tree_size['no_of_children']
+                    common_tree_depth = tree_size['depth']
 
 
     # segregate participants and set seperate root trees accordingly
@@ -267,46 +268,58 @@ class KeyManager:
 
         if topic.root_tree_common is not None:
             participants = []
-            for participant in participants_permissions:
-                participant[0].add_topic(topic, participant[1])
-                participants.append(participant[0])
+            # optimization to make tree scalable
+            if participants_permissions is None:
+                participants = None
+            # optimization to make tree scalable
+            else:
+                for participant in participants_permissions:
+                    participant[0].add_topic(topic, participant[1])
+                    participants.append(participant[0])
 
             if common_tree_depth is None or common_tree_no_children is None:
                 return "error: tree size not specified"
 
             LKH.generate_tree(topic.root_tree_common, common_tree_depth, common_tree_no_children, participants)
 
-            # otherwise segregate the participants
+                # otherwise segregate the participants
         else:
-            for participant in participants_permissions:
-                if participant[1] is PermissionTypesEnum.PUBLISH.value:
-                    participant[0].add_topic(topic, participant[1])
-                    publish_tree_participants.append(participant[0])
-                if participant[1] is PermissionTypesEnum.SUBSCRIBE.value:
-                    participant[0].add_topic(topic, participant[1])
-                    subscribe_tree_participants.append(participant[0])
-                if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
-                    participant[0].add_topic(topic, participant[1])
-                    pub_sub_tree_participants.append(participant[0])
+            # optimization to make tree scalable
+            if participants_permissions is None:
+                publish_tree_participants = None
+                subscribe_tree_participants = None
+                pub_sub_tree_participants = None
+            # optimization to make tree scalable
+            else:
+                for participant in participants_permissions:
+                    if participant[1] is PermissionTypesEnum.PUBLISH.value:
+                        participant[0].add_topic(topic, participant[1])
+                        publish_tree_participants.append(participant[0])
+                    if participant[1] is PermissionTypesEnum.SUBSCRIBE.value:
+                        participant[0].add_topic(topic, participant[1])
+                        subscribe_tree_participants.append(participant[0])
+                    if participant[1] is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+                        participant[0].add_topic(topic, participant[1])
+                        pub_sub_tree_participants.append(participant[0])
 
         if topic.root_tree_publishers is not None:
 
-            if pub_tree_depth is None or pub_tree_no_children is None:
-                return "error: tree size not specified"
+            # if pub_tree_depth is None or pub_tree_no_children is None:
+                # return "error: tree size not specified"
 
             LKH.generate_tree(topic.root_tree_publishers, pub_tree_depth, pub_tree_no_children, participants=publish_tree_participants)
 
         if topic.root_tree_subscribers is not None:
 
-            if sub_tree_depth is None or sub_tree_no_children is None:
-                return "error: tree size not specified"
+            # if sub_tree_depth is None or sub_tree_no_children is None:
+                # return "error: tree size not specified"
 
             LKH.generate_tree(topic.root_tree_subscribers, sub_tree_depth, sub_tree_no_children, participants=subscribe_tree_participants)
 
         if topic.root_tree_pub_sub is not None:
 
-            if pub_sub_tree_depth is None or pub_sub_tree_no_children is None:
-                return "error: tree size not specified"
+            # if pub_sub_tree_depth is None or pub_sub_tree_no_children is None:
+                # return "error: tree size not specified"
 
             LKH.generate_tree(topic.root_tree_pub_sub, pub_sub_tree_depth, pub_sub_tree_no_children, participants=pub_sub_tree_participants)
 

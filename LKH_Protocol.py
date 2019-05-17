@@ -385,7 +385,7 @@ class LKH:
             else:
                 return True
 
-        elif group_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB or group_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB or topic_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
+        elif group_pub_sub_group_type is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB or group_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB or group_pub_sub_group_type is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB:
             if participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                 return False
             else:

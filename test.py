@@ -5,6 +5,13 @@ participants = []
 participants = None
 participants = 0
 
+class Test:
+    def __init__(self, var):
+        self.var = var
+
+class test2:
+    list_var = list()
+
 print (participants)
 
 f = Node("f")
@@ -36,3 +43,15 @@ for part_perm_key, part_perm_value in part_perm.items():
     print(part_perm_key.participant_id)
     print(part_perm_value)
 
+var2 = Test("test")
+print(var2.var)
+
+test2.list_var.append(var2)
+
+var3 = test2.list_var[0]
+var3.var ="xzy"
+
+print(test2.list_var[0].var)
+
+res=[x for x in test2.list_var if x.var == "xzy"][0]
+print(res.var)

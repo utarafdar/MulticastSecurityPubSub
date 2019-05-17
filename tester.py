@@ -74,17 +74,17 @@ group1.add_topic(topic)
 group1.add_topic(topic2)
 KeyManager.setup_group_trees(group1)
 
-print(group1.root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
 KeyManager.add_or_delete_participant(group1, Participant("12345", "001"), 3, add_participant=True)
 KeyManager.add_or_delete_participant(group1, Participant("12345", "002"), 3, add_participant=True)
 KeyManager.add_or_delete_participant(group1, Participant("12345", "003"), 3, add_participant=True)
 
-print(group1.root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
 # opyimiztion test
-print(RenderTree(group1.root_tree_publishers))
+print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_publishers))
 #print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
-print(RenderTree(group1.root_tree_subscribers))
-print(RenderTree(group1.root_tree_pub_sub))
+print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_subscribers))
+print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub))
 
 
 # result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)

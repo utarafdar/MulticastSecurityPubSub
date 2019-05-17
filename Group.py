@@ -14,25 +14,27 @@ class Group:
             self.id = uuid.uuid4()
         else:
             self.id = group_id
+
+        """  
         self.root_tree_common = None
         self.root_tree_publishers = None
         self.root_tree_subscribers = None
-        self.root_tree_pub_sub = None
+        self.root_tree_pub_sub = None"""
         # topics are part of the group
-        self.topics = []
+        self.topics = list()
         self.participants_permissions = dict()
         # a way to set no of children and depth for individual groups
         # remove these after resolving
-        self.no_of_children_common_tree = None
+        """ self.no_of_children_common_tree = None
         self.depth_common_tree = None
         self.no_of_children_publisher_tree = None
         self.depth_publisher_tree = None
         self.no_of_children_subscriber_tree = None
         self.depth_subscriber_tree = None
         self.edge_case_one_publisher_keys = None
-        self.edge_case_one_subscriber_keys = None
+        self.edge_case_one_subscriber_keys = None"""
 
-    def set_root_tree_common(self, root_node_common, no_of_children_common_tree=None, depth_common_tree=None):
+    """ def set_root_tree_common(self, root_node_common, no_of_children_common_tree=None, depth_common_tree=None):
         self.root_tree_common = Node(self.group_name, tree_node=root_node_common)
         #self.root_tree_common = root_node_common
         self.no_of_children_common_tree = no_of_children_common_tree
@@ -54,7 +56,7 @@ class Group:
         self.root_tree_pub_sub = Node(self.group_name, tree_node=root_node_pub_sub)
         #self.root_tree_publishers = root_node_publishers
         self.no_of_children_publisher_tree = no_of_children_publisher_tree
-        self.depth_publisher_tree = depth_publisher_tree
+        self.depth_publisher_tree = depth_publisher_tree"""
 
     def add_topic(self, topic):
         self.topics.append(topic)

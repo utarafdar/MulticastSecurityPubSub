@@ -5,6 +5,7 @@ from Topic import Topic
 from Group import Group
 from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 import random
+import math
 
 # todo -- figure out what data needs to be persisted and how
 
@@ -27,7 +28,8 @@ class LKH:
             no_of_children = 2
         elif depth is None and no_of_children is None and participants is not None:
             # or set up tree size
-            return "error specify size"
+            no_of_children = 2
+            depth = math.ceil(math.log2(len(participants)))
         else:
             pass
 

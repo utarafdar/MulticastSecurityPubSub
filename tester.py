@@ -8,6 +8,8 @@ from anytree import Node, RenderTree, findall_by_attr, findall, Resolver
 from CustomEnums import TypeOfPubSubGroupEnum, PermissionTypesEnum
 from PubSubKeyManagerTreeType import KeyManager
 test_lkh = LKH()
+from KeyManagerGKMP import KeyManagerGKMP
+
 #test_tree = test_lkh.setup_tree_no_participants(3, 2, "test")[0]
 #print(findall_by_attr(test_tree, "3")[0].tree_node.node_key)
 #print(RenderTree(test_tree))
@@ -78,15 +80,37 @@ print(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub.tree_node.root_nod
 KeyManager.add_or_delete_participant(group1, Participant("12345", "001"), 3, add_participant=True)
 KeyManager.add_or_delete_participant(group1, Participant("12345", "002"), 3, add_participant=True)
 KeyManager.add_or_delete_participant(group1, Participant("12345", "003"), 3, add_participant=True)
+KeyManager.add_or_delete_participant(group1, participant4, 3, add_participant=True)
+
+res = KeyManager.group_tree_mapping_list[0]
 
 print(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_publishers.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_subscribers.tree_node.root_node_keys['subscriber_private_key'])
 # opyimiztion test
 print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_publishers))
 #print(topic2.root_tree_publishers.leaves[0].leaf_node.participant.pairwise_key)
 print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_subscribers))
 print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub))
 
+KeyManager.add_or_delete_participant(group1, participant4, 3, delete_participant=True)
+print(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_publishers.tree_node.root_node_keys['publisher_private_key'])
+print(KeyManager.group_tree_mapping_list[0].root_tree_subscribers.tree_node.root_node_keys['subscriber_private_key'])
+print(RenderTree(KeyManager.group_tree_mapping_list[0].root_tree_pub_sub))
 
+# test gkmp
+
+KeyManagerGKMP.set_up_gkmp_group(group1)
+KeyManagerGKMP.add_or_delete_participant(group1, Participant("12345", "001"), 3, add_participant=True)
+KeyManagerGKMP.add_or_delete_participant(group1, Participant("12345", "001"), 1, add_participant=True)
+KeyManagerGKMP.add_or_delete_participant(group1, participant4, 3, add_participant=True)
+KeyManagerGKMP.add_or_delete_participant(group1, Participant("12345", "001"), 2, add_participant=True)
+KeyManagerGKMP.add_or_delete_participant(group1, participant4, 3, delete_participant=True)
+res = KeyManagerGKMP.group_gkmp_mapping_list[0]
+print(res.publishers_and_subscribers[0].pairwise_key)
+print(res.group.group_name)
+print()
 # result1 = KeyManager.add_or_delete_participant(topic2, participant4, 3, delete_participant=True)
 
 #print(RenderTree(topic2.root_tree_pub_sub))

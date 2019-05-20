@@ -1,6 +1,7 @@
 from anytree import Node, findall_by_attr
 from Participant import Participant
 from CustomEnums import PermissionTypesEnum
+import math
 participants = []
 participants = None
 participants = 0
@@ -55,3 +56,4 @@ print(test2.list_var[0].var)
 
 res=[x for x in test2.list_var if x.var == "xzy"][0]
 print(res.var)
+print(math.ceil(math.log2(7) ))

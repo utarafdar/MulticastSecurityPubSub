@@ -98,7 +98,7 @@ class KeyManagerGKMP:
 
             if delete_participant is True:
                 deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if x.particpaint_id == participant.participant_id][0]
-                group_gkmp_map.publishers_and_subscribers.pop(deleted_participant)
+                group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
 
             group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
             changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
@@ -121,12 +121,14 @@ class KeyManagerGKMP:
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.PUBLISH.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers.remove(deleted_participant)
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers_and_subscribers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
+
                 else:
                     return "error wrong permission"
             # for publishers
@@ -159,12 +161,14 @@ class KeyManagerGKMP:
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.subscribers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.subscribers.remove(deleted_participant)
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers_and_subscribers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
+
                 else:
                     return "error wrong permission"
 
@@ -200,12 +204,14 @@ class KeyManagerGKMP:
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.subscribers.remove(deleted_participant)
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers.remove(deleted_participant)
+
                 else:
                     return "error wrong permission"
 
@@ -234,18 +240,19 @@ class KeyManagerGKMP:
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.subscribers.remove(deleted_participant)
 
                 elif participant_permission is PermissionTypesEnum.PUBLISH.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers.remove(deleted_participant)
 
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if
-                                           x.particpaint_id == participant.participant_id][0]
-                    group_gkmp_map.publishers_and_subscribers.pop(deleted_participant)
+                                           x.participant_id == participant.participant_id][0]
+                    group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
+
                 else:
                     return "error wrong permission"
 

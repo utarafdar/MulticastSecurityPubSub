@@ -1,10 +1,10 @@
-from TreeNode import TreeNode, LeafNode
+from .Protocols.CustomClasses.TreeNode import TreeNode, LeafNode
 from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
 from Group import Group
-from CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
-from LKH_Protocol import LKH
+from Server.GroupController.CustomClasses.CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
+from .Protocols.LKH_Protocol import LKH
 import random
 import nacl.utils
 import nacl.secret

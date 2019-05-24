@@ -1,5 +1,6 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
+from Server.CustomClasses.Group import Group
 import paho.mqtt.client as mqtt
 import json
 import copy
@@ -69,8 +70,6 @@ class MqttMesssageData:
 
 
 class GroupController:
-
-    group_key_management_protocol = dict()
 
     @staticmethod
     def set_up_group_lkh(group, participants_permissions=None, tree_sizes=None):
@@ -189,8 +188,6 @@ class GroupController:
 
     @staticmethod
     def add_participant_gkmp():
-
-
         pass
 
     @staticmethod

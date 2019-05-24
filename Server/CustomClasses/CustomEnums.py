@@ -15,3 +15,8 @@ class TypeOfPubSubGroupEnum(Enum):
     SOME_PUB_SOME_SUB = 5
     MANY_PUB_1_SUB = 6
     MANY_SUB_1_PUB = 7
+
+
+class KeyManagementProtocols(Enum):
+    GKMP = 1
+    LKH = 2

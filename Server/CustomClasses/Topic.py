@@ -1,7 +1,7 @@
 from anytree import Node
 import uuid
-from TreeNode import TreeNode
-from CustomEnums import TypeOfPubSubGroupEnum
+from .TreeNode import TreeNode
+from .CustomEnums import TypeOfPubSubGroupEnum
 
 
 class Topic:

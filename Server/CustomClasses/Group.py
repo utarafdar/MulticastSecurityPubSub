@@ -1,20 +1,21 @@
 from anytree import Node
 import uuid
-from CustomEnums import TypeOfPubSubGroupEnum
+from .CustomEnums import TypeOfPubSubGroupEnum, KeyManagementProtocols
 from Topic import Topic
 from Participant import Participant
 
 
 class Group:
 
-    def __init__(self, group_name, group_id=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
+    def __init__(self, group_name, group_id=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB,
+                 type_of_key_management_protocol=KeyManagementProtocols.GKMP.value):
         self.group_name = group_name
         self.type_of_pub_sub_group = type_of_pub_sub_group
         if group_id is None:
             self.id = uuid.uuid4()
         else:
             self.id = group_id
-
+        self.type_of_key_management_protocol = type_of_key_management_protocol
         """  
         self.root_tree_common = None
         self.root_tree_publishers = None

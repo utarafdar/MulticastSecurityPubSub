@@ -21,9 +21,21 @@ class Authorization:
 
     @staticmethod
     def authorization_permissions(participant, group_id):
-        group = [x for x in KeyManagerGKMP.group_gkmp_mapping_list if x.group.id == group_id][0]
+        group = [x for x in Authorization.groups if x.id == group_id][0]
         permission = 3
         if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB:
             permission = random.randint(1, 3)
-        return permission, participant
-        pass
+        return permission, participant, group
+
+    @staticmethod
+    def initializer():
+        from Server.CustomClasses.Topic import Topic
+        topic = Topic("test")
+        topic2 = Topic("test")
+        group1 = Authorization.create_group("testGroup", "123", type_of_key_management_protocol=2,
+                                           type_of_pub_sub_group=4)
+        group1.add_topic(topic)
+        group1.add_topic(topic2)
+        return group1
+
+

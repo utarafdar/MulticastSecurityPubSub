@@ -2,6 +2,8 @@ from anytree import Node, findall_by_attr
 from Participant import Participant
 from CustomEnums import PermissionTypesEnum
 import math
+import json
+from collections import namedtuple
 participants = []
 participants = None
 participants = 0
@@ -9,6 +11,7 @@ participants = 0
 class Test:
     def __init__(self, var):
         self.var = var
+        self.dictionary = {"abc": 1, "xyz":2}
 
 class test2:
     list_var = list()
@@ -54,6 +57,25 @@ var3.var ="xzy"
 
 print(test2.list_var[0].var)
 
-res=[x for x in test2.list_var if x.var == "xzy"][0]
+'''res=[x for x in test2.list_var if x.var == "xzy"][0]
 print(res.var)
-print(math.ceil(math.log2(7) ))
+print(math.ceil(math.log2(7) ))'''
+
+print(json.dumps(var2, default=lambda o: o.__dict__))
+
+list = [1,2,3,4]
+print(list[1:])
+
+data_sa_json = {
+                    'nonce_prefix': 123,
+                    'permissions': 123,
+                    'pairwise_key': 123,
+                    #'ancestor_keys': json.dumps(data_sa.ancestor_keys[1:]),
+                    'group_keys': {'publisher_public_key': 123,
+                                   'subscriber_public_key': 123,
+                                   'publisher_private_key': 123,
+                                   'subscriber_private_key': 123}
+                    #'rekey_topics': json.dumps(data_sa.rekey_topics_keys),
+                    # 'subscriptions': json.dumps(data_sa.subscriptions)
+    }
+print(json.dumps(data_sa_json))

@@ -7,7 +7,7 @@ from Participant import Participant
 
 class Group:
 
-    def __init__(self, group_name, group_id=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB,
+    def __init__(self, group_name, group_id=None, type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB.value,
                  type_of_key_management_protocol=KeyManagementProtocols.GKMP.value):
         self.group_name = group_name
         self.type_of_pub_sub_group = type_of_pub_sub_group

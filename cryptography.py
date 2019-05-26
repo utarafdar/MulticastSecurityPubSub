@@ -8,6 +8,7 @@ from nacl.public import PrivateKey, Box
 import nacl.encoding
 import nacl.signing
 from nacl.hash import blake2b
+from nacl.encoding import HexEncoder
 import base64
 import json
 
@@ -83,7 +84,7 @@ print(enc_data)
 print(decrypt_secret_key(key, enc_data))"""
 
 # Generate Bob's private key, which must be kept secret
-"""skbob = PrivateKey.generate()
+skbob = PrivateKey.generate()
 
 # Bob's public key can be given to anyone wishing to send
 #   Bob an encrypted message
@@ -91,9 +92,11 @@ pkbob = skbob.public_key
 
 # Alice does the same and then Alice and Bob exchange public keys
 skalice = PrivateKey.generate()
-pkalice = skalice.public_key
+pkalice = skalice.public_key.encode(HexEncoder).decode()
 
-print(skalice)
+
+print(type(skalice))
+print(type(nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE).hex()))
 print(pkalice)
 
 # Bob wishes to send Alice an encrypted message so Bob must make a Box with
@@ -102,10 +105,11 @@ print(pkalice)
 # This is our message to send, it must be a bytestring as Box will treat it
 #   as just a binary blob of data.
 message = b"Kill all humans"
-
-enc_message = encrypt_public_key(pkalice, skbob, message)
+# this here ===
+pkalice1 = nacl.public.PublicKey(pkalice, HexEncoder)
+enc_message = encrypt_public_key(pkalice1, skbob, message)
 print(enc_message)
-print(decrypt_public_key(pkbob, skalice, enc_message))"""
+print(decrypt_public_key(pkbob, skalice, enc_message))
 
 
 # Generate a new random signing key

@@ -10,6 +10,6 @@ class Topic:
     def __init__(self, topic_name, topic_id=None):
         self.topicName = topic_name
         if topic_id is None:
-            topic_id = uuid.uuid4()
+            self.topic_id = str(uuid.uuid4())
 
 

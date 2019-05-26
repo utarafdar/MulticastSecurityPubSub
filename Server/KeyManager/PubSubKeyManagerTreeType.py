@@ -3,7 +3,7 @@ from Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Topic import Topic
 from Group import Group
-from Server.GroupController.CustomClasses.CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
+from Server.CustomClasses.CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 from .Protocols.LKH_Protocol import LKH
 import random
 import nacl.utils

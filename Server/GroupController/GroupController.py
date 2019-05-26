@@ -1,10 +1,9 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
-from Server.CustomClasses.Group import Group
 import paho.mqtt.client as mqtt
 import json
 import copy
-from anytree import Node, RenderTree, findall_by_attr, findall, Resolver
+from anytree import Node, findall_by_attr
 
 
 class DataSA:
@@ -18,6 +17,11 @@ class DataSA:
         # type of enc publishing messages
         # type of dec sub messages
         # type of auth GCKS
+        # topics, groupid, paiwise key and participant id
+        self.group_id = None
+        self.topics = list()
+        self.pairwise_key = None
+        self.participant_id = None
         self.nonce_prefix = None
         self.permissions = permissions
         self.subscriptions = list()
@@ -47,6 +51,21 @@ class DataSA:
 
     def set_request_rekey_topic (self, rekey_topic):
         self.request_rekey_topic = rekey_topic
+
+    def set_pairwise_key(self, pairwise_key):
+        self.pairwise_key = pairwise_key
+
+    def set_participant_id(self, participant_id):
+        self.participant_id = participant_id
+
+    def set_group_topics(self, group_topics):
+        for topic in group_topics:
+            self.topics.append({'topic_name': topic.topicName,
+                                'topic_id': topic.topic_id})
+
+    def set_group_id(self, group_id):
+        self.group_id = str(group_id)
+
 
 class RekeySa:
     def __init__(self, nonce_range, changed_keys=None):
@@ -80,11 +99,11 @@ class GroupController:
         KeyManagerGKMP.set_up_gkmp_group(group)
 
     @staticmethod
-    def add_participant_lkh(participant, permissions, group):
+    def add_participant_lkh(group, participant, permissions):
         result = KeyManager.add_or_delete_participant(group, participant, permissions, True, False)
         # check again
         for message in result['add_participant'][0]:
-            update_msg_topic_name = group.group_id + result['add_participant'][1]['tree_type'] + message[
+            update_msg_topic_name = str(group.id) + result['add_participant'][1]['tree_type'] + message[
                 'message_name']
             # todo - nonce range logic
             rekey_sa = RekeySa(3)
@@ -124,13 +143,13 @@ class GroupController:
         tree = Node(group.group_name)
         tree_type_name = ''
         if permissions is 1:
-            tree = copy.deepcopy(group_tree_map.topic.root_tree_publishers)
+            tree = copy.deepcopy(group_tree_map.root_tree_publishers)
             tree_type_name = 'pub'
         if permissions is 2:
-            tree = copy.deepcopy(group_tree_map.topic.root_tree_subscribers)
+            tree = copy.deepcopy(group_tree_map.root_tree_subscribers)
             tree_type_name = 'sub'
         if permissions is 3:
-            tree = copy.deepcopy(group_tree_map.topic.root_tree_pub_sub)
+            tree = copy.deepcopy(group_tree_map.root_tree_pub_sub)
             tree_type_name = 'pub_sub'
 
         # recheck
@@ -178,12 +197,15 @@ class GroupController:
         # data_sa.request_rekey_topic("--todo ") # --todo
         data_sa.set_ancestor_keys(ancestor_keys)
         data_sa.set_gcks_public_key("key") # todo
-        data_sa.set_group_keys(ancestor_keys[0])
+        data_sa.set_group_keys(ancestor_keys[0]['key'])
         data_sa.set_nonce_prefix(3) #-- todo
         data_sa.set_rekey_topics(topic_to_sub_enc_keys)
         data_sa.set_subscriptions(group.topics)
         data_sa.set_request_rekey_topic("todo")
-
+        data_sa.set_pairwise_key(participant.pairwise_key)
+        data_sa.set_participant_id(participant.participant_id)
+        data_sa.set_group_topics(group.topics)
+        data_sa.set_group_id(group.id)
         return data_sa
 
     @staticmethod

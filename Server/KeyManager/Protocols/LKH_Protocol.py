@@ -2,7 +2,7 @@ from .CustomClasses.TreeNode import TreeNode, LeafNode
 from Server.CustomClasses.Participant import Participant
 from anytree import Node, findall_by_attr, PreOrderIter
 from Server.CustomClasses.Topic import Topic
-from Server.GroupController.CustomClasses.CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
+from Server.CustomClasses.CustomEnums import PermissionTypesEnum, TypeOfPubSubGroupEnum
 import random
 import math
 

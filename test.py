@@ -31,6 +31,7 @@ g = Node("g", parent=e)
 res=findall_by_attr(f, "b")
 res1 = res[0]
 b.name = "z"
+f.leaves
 #print (b.name)
 
 participant4 = Participant("12345", "004")

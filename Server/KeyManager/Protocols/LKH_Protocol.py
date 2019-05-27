@@ -37,7 +37,7 @@ class LKH:
                 for k in range(no_of_children):
                     children_node = TreeNode(node_count)
                     children_tree_node = Node(str(node_count), parent=parent, tree_node=children_node)
-                    children_tree_node.is_root
+                    # children_tree_node.is_root
                     temp_parent.append(children_tree_node)
                     node_count += 1
             current_parents.clear()
@@ -114,6 +114,7 @@ class LKH:
                 # 1st child has the same participant and the second child is empty
                 last_node_id += 1
                 leaf.leaf_node.name = str(last_node_id)
+                leaf.leaf_node.node_id = str(last_node_id)
                 leaf.parent = new_parent
                 # send the changed structure message only to the participants affected
                 # newly added participant messages will be handled by registration protocol not here
@@ -121,7 +122,7 @@ class LKH:
                 message_detail = {
                     "message_name": "change_tree_structure" + "/" + leaf.name,
                     "encryption_key": leaf.leaf_node.participant.pairwise_key,
-                    "new_ancestor_key": new_parent.tree_node.node_key}
+                    "changed_parent_key": new_parent.tree_node.node_key}  # todo -- check issues
                 message_details_dict_list.append(message_detail)
 
                 # first check if the participant is already added
@@ -138,7 +139,7 @@ class LKH:
                     last_node_id += 1
                     Node("empty", parent=new_parent, leaf_node=LeafNode(str(last_node_id)))
 
-            return tree_root, added_participant, message_details_dict_list
+            return tree_root, added_participant, message_details_dict_list, True
 
         else:
 
@@ -171,11 +172,16 @@ class LKH:
             siblings = added_participant.siblings
             for sibling in siblings:
                 if sibling.leaf_node.participant is not None:
+                    # if first parent is root
+                    if sibling.parent.is_root:
+                        changed_parent_key = sibling.parent.tree_node.root_node_keys
+                    else:
+                        changed_parent_key = sibling.parent.tree_node.node_key
                     message_detail = {# "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
                                       "message_name": str(sibling.parent.tree_node.node_id) + "/" +
                                                       str(sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
                                       "encryption_key": sibling.leaf_node.participant.pairwise_key,
-                                      "changed_parent_key": sibling.parent.tree_node.node_key}
+                                      "changed_parent_key": changed_parent_key}
                     message_details_dict_list.append(message_detail)
 
             # construct messages for ancestors and their siblings
@@ -195,7 +201,7 @@ class LKH:
                     # add that condition for the last one. when ancestor = 0 basically.
                     message_details_dict_list.append(message_detail)
 
-            return tree_root, added_participant, message_details_dict_list
+            return tree_root, added_participant, message_details_dict_list, False
 
     @staticmethod
     def delete_participant(tree_root, participant, changed_root_keys=None):

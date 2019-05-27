@@ -696,9 +696,13 @@ class KeyManager:
                     tree_type = 'common'
 
                 update_tree_data.append((message2[1], {'tree_type': tree_type}))
+        tree_structure_change = False
+        if message[3] is True:
+            tree_structure_change = True
 
         return_message = {'add_participant': add_participant_data,
                           'delete_participant': delete_participant_data,
-                          'update_tree': update_tree_data}
+                          'update_tree': update_tree_data,
+                          'tree_structure_change': tree_structure_change}
         # return message3[2],message2[1]
         return return_message

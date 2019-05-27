@@ -28,6 +28,7 @@ def threaded(conn):
         data = conn.recv(1024)
         if not data:
             break
+        print(data.decode('utf-8'))
         # participant = pickle.loads(data)
         group_id = "123"
         # generate participant Id and pairwise key
@@ -113,7 +114,7 @@ def __convert_data_sa_to_json(data_sa):
                     'nonce_prefix': data_sa.nonce_prefix,
                     'permissions': data_sa.permissions,
                     'pairwise_key': data_sa.pairwise_key.hex(),
-                    #'ancestor_keys': json.dumps(data_sa.ancestor_keys[1:]),
+                    'ancestor_keys': data_sa.ancestor_keys[1:],
                     'group_keys': {'publisher_public_key': publisher_public_key,
                                    'subscriber_public_key': subscriber_public_key,
                                    'publisher_private_key': publisher_private_key,

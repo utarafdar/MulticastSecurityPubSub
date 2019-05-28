@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 import json
 import copy
 from anytree import Node, findall_by_attr
+from nacl.encoding import HexEncoder
 
 
 class DataSA:
@@ -28,6 +29,7 @@ class DataSA:
         self.pairwise_key = pairwise_key
         self.rekey_topics_keys = list()
         self.request_rekey_topic = None
+        self.change_tree_structure_topic = None
 
     @staticmethod
     def set_gcks_public_key(public_key=None):
@@ -66,6 +68,9 @@ class DataSA:
     def set_group_id(self, group_id):
         self.group_id = str(group_id)
 
+    def set_change_tree_structure_topic(self, group_id, participant_id):
+        self.change_tree_structure_topic = "changeGroupStructure__"+str(group_id)+"__/"+str(participant_id)
+
 
 class RekeySa:
     def __init__(self, nonce_range, changed_keys=None):
@@ -88,9 +93,55 @@ class MqttMesssageData:
         # logic to send message
 
     @staticmethod
-    def change_structure_message(ancestor_keys, message_topics, key):
+    def send_rekey_message(message, topic, encryption_key):
+        if type(message) is dict:
+            mqtt_message = dict()
+            for key, value in message.items():
+                if key is 'publisher_public_key' and value is not None:
+                    mqtt_message['publisher_public_key'] = value.encode(HexEncoder).decode()
+                if key is 'subscriber_public_key' and value is not None:
+                    mqtt_message['subscriber_public_key'] = value.encode(HexEncoder).decode()
+                if key is 'publisher_private_key' and value is not None:
+                    mqtt_message['publisher_private_key'] = value.encode(HexEncoder).decode()
+                if key is 'subscriber_private_key' and value is not None:
+                    mqtt_message['subscriber_private_key'] = value.encode(HexEncoder).decode()
+            message_to_bytes = json.dumps(mqtt_message)
+            print(message_to_bytes)
+            print(topic)
+            print(encryption_key)
+            print("rekey")
+
+    @staticmethod
+    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
         # set a common change structure type message topic
-        pass
+        publisher_public_key = None
+        subscriber_public_key = None
+        publisher_private_key = None
+        subscriber_private_key = None
+        for key, value in ancestor_keys[0]['key'].items():
+            if key is 'publisher_public_key' and value is not None:
+                publisher_public_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_public_key' and value is not None:
+                subscriber_public_key = value.encode(HexEncoder).decode()
+            if key is 'publisher_private_key' and value is not None:
+                publisher_private_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_private_key' and value is not None:
+                subscriber_private_key = value.encode(HexEncoder).decode()
+
+        data_sa_json = {
+
+            'ancestor_keys': ancestor_keys[1:],
+            'group_keys': {'publisher_public_key': publisher_public_key,
+                           'subscriber_public_key': subscriber_public_key,
+                           'publisher_private_key': publisher_private_key,
+                           'subscriber_private_key': subscriber_private_key}
+        }
+        print(json.dumps(data_sa_json))
+        print(new_rekey_topics)
+        print(encryption_key)
+        print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
+        print("change str")
+
 
 class GroupController:
 
@@ -135,11 +186,12 @@ class GroupController:
                 else:
                     message_to_bytes = message['changed_parent_key']'''
                 rekey_sa.changed_keys = ['changed_parent_key']
+                MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
 
                 rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
                 rekey_message.send_message()
         else:
-            pass
+
             # send strucutre change message
             # check participants in the group
             # send all the new ancestors and changed keys, except for the participant
@@ -153,7 +205,9 @@ class GroupController:
                                                                                                     group,
                                                                                                     tree_type_name,
                                                                                                     leaf.leaf_node.participant)
-                    MqttMesssageData.change_structure_message(ancestor_keys,topic_to_sub_enc_keys, leaf.leaf_node.participant.pairwise_key)
+                    MqttMesssageData.change_structure_message(ancestor_keys, topic_to_sub_enc_keys,
+                                                              leaf.leaf_node.participant.pairwise_key,
+                                                              leaf.leaf_node.participant.participant_id, group.id)
 
         # update other trees where group keys changed
         for trees in result['update_tree']:
@@ -241,7 +295,7 @@ class GroupController:
                                       'key': ancestor_list[i].tree_node.node_key.hex()})
 
             if i != len(ancestor_list) - 1:
-                topic_to_sub_enc_keys.append({'topic_to_sub': group.group_name + tree_type_name +
+                topic_to_sub_enc_keys.append({'topic_to_sub': group.id + tree_type_name +
                                                               str(ancestor_list[
                                                                       i].tree_node.node_id) + '/' +
                                                               str(ancestor_list[i + 1].tree_node.node_id) +
@@ -253,7 +307,7 @@ class GroupController:
                                               'enc_key': ancestor_list[i + 1].tree_node.node_key.hex()})
 
             else:
-                topic_to_sub_enc_keys.append({'topic_to_sub': group.group_name + tree_type_name +
+                topic_to_sub_enc_keys.append({'topic_to_sub': group.id + tree_type_name +
                                                               str(ancestor_list[
                                                                       i].tree_node.node_id) + '/' +
                                                               participant.participant_id + "__changeParent__" +

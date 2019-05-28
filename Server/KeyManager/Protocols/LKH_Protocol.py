@@ -120,7 +120,7 @@ class LKH:
                 # newly added participant messages will be handled by registration protocol not here
 
                 message_detail = {
-                    "message_name": "change_tree_structure" + "/" + leaf.name,
+                    "message_name": "change_tree_structure" + "/" + leaf.leaf_node.participant.participant_id,
                     "encryption_key": leaf.leaf_node.participant.pairwise_key,
                     "changed_parent_key": new_parent.tree_node.node_key}  # todo -- check issues
                 message_details_dict_list.append(message_detail)
@@ -164,7 +164,8 @@ class LKH:
             # first construct messages for participant and its siblings
             message_details_dict_list = []
             # adding message for the newly added participant to be decided based on other implementations
-            # todo
+            # todo -- including group ids to  be done in group controller
+
             """message_detail = {"message_name": str(added_participant.parent.tree_node.node_id) + "/" + str(added_participant.leaf_node.node_id),
                               "encryption_key": added_participant.leaf_node.participant.pairwise_key,
                               "changed_parent_key": added_participant.parent.tree_node.node_key}

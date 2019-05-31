@@ -7,7 +7,7 @@ def on_publish(client,userdata,result):             #create function for callbac
     pass
 
 # broker_address="192.168.1.184"
-broker_address = "iot.eclipse.org"  # use external broker
+broker_address = "broker.mqttdashboard.com"  # use external broker
 publisher = mqtt.Client("P3")  # create new instance
 #publisher.on_publish = on_publish
 publisher.connect(broker_address)  # connect to broker

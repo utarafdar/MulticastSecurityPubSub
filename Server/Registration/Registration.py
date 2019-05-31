@@ -39,6 +39,7 @@ def threaded(conn):
         results = Authorization.authorization_permissions(participant, group_id)
         permission = results[0]
         group = results[2]
+        # cannot decide this here add lkh or gkmp-- todo
         data_sa = GroupController.add_participant_lkh(group, participant, permission)
 
         # send request to authentication
@@ -69,7 +70,7 @@ def Main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 65431
+    port = 65432
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     print("socket binded to post", port)
@@ -121,7 +122,10 @@ def __convert_data_sa_to_json(data_sa):
                                    'subscriber_private_key': subscriber_private_key},
                     'rekey_topics': data_sa.rekey_topics_keys,
                     'subscriptions': data_sa.topics,
-                    'group_id': data_sa.group_id
+                    'group_id': data_sa.group_id,
+                    'type_of_key_management': data_sa.key_management_type,
+                    'change_tree_structure_topic': data_sa.change_tree_structure_topic,
+                    'participant_id': data_sa.participant_id
     }
     return data_sa_json
 

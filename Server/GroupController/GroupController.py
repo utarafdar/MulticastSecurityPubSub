@@ -1,5 +1,6 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
+from Server.CustomClasses.CustomEnums import KeyManagementProtocols
 import paho.mqtt.client as mqtt
 import json
 import copy
@@ -79,6 +80,16 @@ class RekeySa:
 
 
 class MqttMesssageData:
+    connected_mqtt = False
+    publisher_GCKS = None
+
+    @staticmethod
+    def initiate_mqtt_connection():
+        broker_address = "broker.mqttdashboard.com"  # use external broker
+        MqttMesssageData.publisher_GCKS = mqtt.Client("P3")  # create new instance
+        MqttMesssageData.publisher_GCKS.connect(broker_address)
+        MqttMesssageData.connected_mqtt = True
+
 
     def __init__(self, rekey_sa, topic, encryption_key):
         self.rekey_sa = copy.copy(rekey_sa)
@@ -87,10 +98,11 @@ class MqttMesssageData:
 
     def send_message(self):
         # try something else here later
-        broker_address = "iot.eclipse.org"  # use external broker
-        publisher_GCKS = mqtt.Client("GCKS")  # create new instance
-        publisher_GCKS.connect(broker_address)
+        #broker_address = "iot.eclipse.org"  # use external broker
+        # publisher_GCKS = mqtt.Client("GCKS")  # create new instance
+        # publisher_GCKS.connect(broker_address)
         # logic to send message
+        pass
 
     @staticmethod
     def send_rekey_message(message, topic, encryption_key):
@@ -105,11 +117,20 @@ class MqttMesssageData:
                     mqtt_message['publisher_private_key'] = value.encode(HexEncoder).decode()
                 if key is 'subscriber_private_key' and value is not None:
                     mqtt_message['subscriber_private_key'] = value.encode(HexEncoder).decode()
-            message_to_bytes = json.dumps(mqtt_message)
-            print(message_to_bytes)
-            print(topic)
-            print(encryption_key)
-            print("rekey")
+        else:
+            mqtt_message = message.hex()
+
+        message_to_bytes = json.dumps(mqtt_message)
+        print(message_to_bytes)
+        print(topic)
+        print(encryption_key)
+        print("rekey")
+
+        if MqttMesssageData.connected_mqtt:
+                MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+        else:
+                MqttMesssageData.initiate_mqtt_connection()
+                MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
 
     @staticmethod
     def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
@@ -134,8 +155,15 @@ class MqttMesssageData:
             'group_keys': {'publisher_public_key': publisher_public_key,
                            'subscriber_public_key': subscriber_public_key,
                            'publisher_private_key': publisher_private_key,
-                           'subscriber_private_key': subscriber_private_key}
+                           'subscriber_private_key': subscriber_private_key},
+            'rekey_topics': new_rekey_topics
         }
+
+        if not MqttMesssageData.connected_mqtt:
+            MqttMesssageData.initiate_mqtt_connection()
+
+        MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
+
         print(json.dumps(data_sa_json))
         print(new_rekey_topics)
         print(encryption_key)
@@ -188,8 +216,8 @@ class GroupController:
                 rekey_sa.changed_keys = ['changed_parent_key']
                 MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
 
-                rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
-                rekey_message.send_message()
+                # rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
+                # rekey_message.send_message()
         else:
 
             # send strucutre change message
@@ -241,6 +269,7 @@ class GroupController:
 
 
         # data_sa.request_rekey_topic("--todo ") # --todo
+        data_sa.key_management_type = KeyManagementProtocols.LKH.value
         data_sa.set_ancestor_keys(ancestor_keys)
         data_sa.set_gcks_public_key("key") # todo
         data_sa.set_group_keys(ancestor_keys[0]['key'])
@@ -252,6 +281,7 @@ class GroupController:
         data_sa.set_participant_id(participant.participant_id)
         data_sa.set_group_topics(group.topics)
         data_sa.set_group_id(group.id)
+        data_sa.set_change_tree_structure_topic(group.id, participant.participant_id)
         return data_sa
 
     @staticmethod

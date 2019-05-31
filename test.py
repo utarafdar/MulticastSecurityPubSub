@@ -80,3 +80,26 @@ data_sa_json = {
                     # 'subscriptions': json.dumps(data_sa.subscriptions)
     }
 print(json.dumps(data_sa_json))
+
+class a:
+    def __init__(self, ab):
+        self.ab = ab
+
+class bc(a):
+    xzy= None
+    def __init__(self, bb):
+        self.bb = bb
+        bc.xzy = a("abcdfgs")
+
+
+a = bc("abc")
+bc.ab = "asdsad"
+
+print(a.bb)
+print(a.ab)
+print(bc.xzy.ab)
+
+list_dict = [{"topic_to_sub": "123pub_sub0/3579b257-5fd2-48be-bff5-6e92277adf46__changeParent__0", "enc_key": "7b955c8ae4f835e06ab59463c28d578ee83b4ec8d725fcc7fbebbf31e88cbf79"}, {"topic_to_sub": "123pub_sub0/3579b257-5fd2-48be-bff5-6e92277adf46__changeParent__0", "enc_key": "7b955c8ae4f835e06ab59463c28d578ee83b4ec8d725fcc7fbebbf31e88cbf79"}]
+
+for list in list_dict:
+    print(list['topic_to_sub']  )

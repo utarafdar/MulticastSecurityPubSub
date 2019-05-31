@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bab1eb7c-613a-4c78-a9b7-be65e02b7e7c" name="Default Changelist" comment="">
+    <list default="true" id="bab1eb7c-613a-4c78-a9b7-be65e02b7e7c" name="Default Changelist" comment="Re-key and change group structure messages constructed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/GroupController/GroupController.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server/GroupController/GroupController.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/KeyManager/Protocols/LKH_Protocol.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server/KeyManager/Protocols/LKH_Protocol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/Registration/Registration.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Registration/Registration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pub.py" beforeDir="false" afterPath="$PROJECT_DIR$/pub.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,11 +19,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Server/GroupController/GroupController.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="551">
-              <caret line="209" column="119" selection-start-line="209" selection-start-column="119" selection-end-line="209" selection-end-column="119" />
+            <state relative-caret-position="290">
+              <caret line="120" column="39" selection-start-line="120" selection-start-column="39" selection-end-line="120" selection-end-column="39" />
               <folding>
                 <element signature="e#0#65#0" expanded="true" />
               </folding>
@@ -30,87 +32,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/Authorization/Initializer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="9" column="60" selection-start-line="9" selection-start-column="57" selection-end-line="9" selection-end-column="60" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/Authorization/Authorization.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="223">
-              <caret line="11" column="41" selection-start-line="11" selection-start-column="33" selection-end-line="11" selection-end-column="41" />
-              <folding>
-                <element signature="e#0#44#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/lib/python3.6/dist-packages/anytree/iterators/preorderiter.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1224">
-              <caret line="51" selection-start-line="51" selection-end-line="51" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/CustomClasses/Group.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="25" column="37" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="37" />
-              <folding>
-                <element signature="e#0#24#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/CustomClasses/TreeNode.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/Registration/Registration.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1008">
-              <caret line="108" column="29" selection-start-line="108" selection-start-column="29" selection-end-line="108" selection-end-column="29" />
-              <folding>
-                <element signature="e#36#49#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="672">
-              <caret line="33" column="8" selection-start-line="33" selection-start-column="8" selection-end-line="33" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#41#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Server/KeyManager/PubSubKeyManagerTreeType.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16680">
-              <caret line="705" column="48" selection-start-line="705" selection-start-column="27" selection-end-line="705" selection-end-column="48" />
+            <state relative-caret-position="-1110">
+              <caret line="642" column="8" selection-start-line="642" selection-start-column="8" selection-end-line="642" selection-end-column="8" />
               <folding>
                 <element signature="e#0#64#0" expanded="true" />
               </folding>
@@ -119,12 +44,85 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Server/KeyManager/Protocols/LKH_Protocol.py">
+        <entry file="file://$PROJECT_DIR$/Test_key_dist/Client.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="672">
+              <caret line="81" column="71" selection-start-line="81" selection-start-column="57" selection-end-line="81" selection-end-column="71" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/lib/python3.6/socket.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17256">
+              <caret line="723" selection-start-line="723" selection-end-line="723" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sub.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#53#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/subSimple.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pub.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="192">
+              <caret line="9" column="18" selection-start-line="9" selection-start-column="18" selection-end-line="9" selection-end-column="42" />
+              <folding>
+                <element signature="e#0#53#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2376">
+              <caret line="104" column="33" selection-start-line="104" selection-start-column="33" selection-end-line="104" selection-end-column="33" />
+              <folding>
+                <element signature="e#0#41#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Server/Registration/Registration.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="104">
+              <caret line="63" column="11" selection-start-line="53" selection-start-column="10" selection-end-line="63" selection-end-column="11" />
+              <folding>
+                <element signature="e#36#49#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Test_key_dist/KeyManager.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="240">
-              <caret line="182" column="124" lean-forward="true" selection-start-line="182" selection-start-column="58" selection-end-line="182" selection-end-column="124" />
+              <caret line="94" column="94" lean-forward="true" selection-start-line="91" selection-start-column="16" selection-end-line="94" selection-end-column="94" />
               <folding>
-                <element signature="e#0#54#0" expanded="true" />
+                <element signature="e#0#28#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -141,8 +139,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>root_tree</find>
-      <find>topic</find>
       <find>generat</find>
       <find>generate_</find>
       <find>.public_key</find>
@@ -171,6 +167,8 @@
       <find>group_keys</find>
       <find>publisher_keys_reset</find>
       <find>tree</find>
+      <find>HexEncoder</find>
+      <find>__get_ancestors_and_keys</find>
     </findStrings>
     <replaceStrings>
       <replace>topic</replace>
@@ -183,7 +181,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/PublishSubscribeTreeKeys.py" />
         <option value="$PROJECT_DIR$/Test_Working/MqttClient.py" />
         <option value="$PROJECT_DIR$/Test_Working/GCKS.py" />
         <option value="$PROJECT_DIR$/Test_Working/Registration.py" />
@@ -227,12 +224,13 @@
         <option value="$PROJECT_DIR$/cryptography.py" />
         <option value="$PROJECT_DIR$/Server/CustomClasses/Topic.py" />
         <option value="$PROJECT_DIR$/Server/KeyManager/PubSubKeyManagerTreeType.py" />
-        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/venv/dumpgrpconttroller.txt" />
         <option value="$PROJECT_DIR$/dump.txt" />
         <option value="$PROJECT_DIR$/grpcontolle.txt" />
-        <option value="$PROJECT_DIR$/Server/Registration/Registration.py" />
         <option value="$PROJECT_DIR$/Server/KeyManager/Protocols/LKH_Protocol.py" />
+        <option value="$PROJECT_DIR$/pub.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/Server/Registration/Registration.py" />
         <option value="$PROJECT_DIR$/Server/GroupController/GroupController.py" />
       </list>
     </option>
@@ -302,6 +300,11 @@
               <item name="Server" type="462c0819:PsiDirectoryNode" />
               <item name="Registration" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="LKH_prototype" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LKH_prototype" type="462c0819:PsiDirectoryNode" />
+              <item name="Test_key_dist" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -310,7 +313,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Client" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -342,27 +345,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.Registration">
-    <configuration name="Client" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="mqtt" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Registartion" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Registartion/Client.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="Registration (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="mqtt" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -405,7 +387,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="cryptography" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="pub" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="mqtt" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -417,7 +399,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cryptography.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pub.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -447,20 +429,41 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="testSubscribe" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="mqtt" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testSubscribe.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
-      <item itemvalue="Python.Client" />
-      <item itemvalue="Python.Registration" />
-      <item itemvalue="Python.test" />
-      <item itemvalue="Python.cryptography" />
       <item itemvalue="Python.Registration (1)" />
+      <item itemvalue="Python.Registration" />
+      <item itemvalue="Python.pub" />
+      <item itemvalue="Python.testSubscribe" />
+      <item itemvalue="Python.test" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.Registration" />
-        <item itemvalue="Python.Registration (1)" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.cryptography" />
-        <item itemvalue="Python.Client" />
+        <item itemvalue="Python.pub" />
+        <item itemvalue="Python.testSubscribe" />
+        <item itemvalue="Python.Registration (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -678,7 +681,14 @@
       <option name="project" value="LOCAL" />
       <updated>1558908459536</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Re-key and change group structure messages constructed">
+      <created>1559082879240</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1559082879240</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TodoView">
@@ -692,14 +702,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="27" width="1853" height="1053" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13755459" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13755459" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32864866" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49727073" visible="true" weight="0.24972972" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49727073" visible="true" weight="0.2918919" />
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.32972974" />
@@ -786,36 +795,10 @@
     <MESSAGE value="initial server side implemetation -- not complete" />
     <MESSAGE value="authorization -- not complete" />
     <MESSAGE value="sending SA over socket" />
-    <option name="LAST_COMMIT_MESSAGE" value="sending SA over socket" />
+    <MESSAGE value="Re-key and change group structure messages constructed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Re-key and change group structure messages constructed" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Test_key_dist/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Test_key_dist/Tester.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PublishSubscribeTreeKeys.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="8" column="60" lean-forward="true" selection-end-line="8" selection-end-column="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CustomEnums.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="11" column="24" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GKMP.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/KeyManagerGKMP.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2544">
@@ -895,13 +878,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/Registration/client.py" />
-    <entry file="file://$PROJECT_DIR$/Server/CustomClasses/CustomEnums.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="19" column="28" selection-start-line="19" selection-start-column="6" selection-end-line="19" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Group.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="456">
@@ -917,13 +893,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/CustomClasses/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Test_key_dist/Client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="3" selection-start-line="3" selection-end-line="3" selection-end-column="35" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Client/CustomClasses/Group.py" />
     <entry file="file://$PROJECT_DIR$/Client/SecureMqtt.py" />
@@ -965,16 +934,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Test_key_dist/Registration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="10" column="44" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/lib/python3.6/json/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="166">
@@ -1010,25 +969,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pub.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cryptography.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="94" column="56" lean-forward="true" selection-start-line="94" selection-start-column="29" selection-end-line="94" selection-end-column="56" />
-          <folding>
-            <element signature="e#92#101#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Server/CustomClasses/Topic.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="261">
@@ -1045,16 +985,6 @@
           <caret line="173" selection-start-line="173" selection-end-line="173" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Test_key_dist/KeyManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2205">
-          <caret line="160" column="68" lean-forward="true" selection-start-line="160" selection-start-column="68" selection-end-line="160" selection-end-column="68" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1081,35 +1011,6 @@
           <caret line="25" column="37" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="37" />
           <folding>
             <element signature="e#0#24#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Server/CustomClasses/TreeNode.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="33" column="8" selection-start-line="33" selection-start-column="8" selection-end-line="33" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Server/KeyManager/PubSubKeyManagerTreeType.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16680">
-          <caret line="705" column="48" selection-start-line="705" selection-start-column="27" selection-end-line="705" selection-end-column="48" />
-          <folding>
-            <element signature="e#0#64#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1141,22 +1042,138 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Server/Registration/Registration.py">
+    <entry file="file://$PROJECT_DIR$/Server/CustomClasses/TreeNode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1008">
-          <caret line="108" column="29" selection-start-line="108" selection-start-column="29" selection-end-line="108" selection-end-column="29" />
+        <state relative-caret-position="479">
+          <caret line="48" lean-forward="true" selection-start-line="44" selection-end-line="48" />
           <folding>
-            <element signature="e#36#49#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Server/CustomClasses/CustomEnums.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="19" column="28" selection-start-line="19" selection-start-column="6" selection-end-line="19" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cryptography.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="94" column="56" lean-forward="true" selection-start-line="94" selection-start-column="29" selection-end-line="94" selection-end-column="56" />
+          <folding>
+            <element signature="e#92#101#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python3.6/dist-packages/paho/mqtt/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="1946" column="8" selection-start-line="1946" selection-start-column="8" selection-end-line="1946" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test_key_dist/Registration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="10" column="44" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testSubscribe.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///usr/lib/python3.6/socket.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17256">
+          <caret line="723" selection-start-line="723" selection-end-line="723" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sub.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/subSimple.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pub.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="9" column="18" selection-start-line="9" selection-start-column="18" selection-end-line="9" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2376">
+          <caret line="104" column="33" selection-start-line="104" selection-start-column="33" selection-end-line="104" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test_key_dist/Client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="81" column="71" selection-start-line="81" selection-start-column="57" selection-end-line="81" selection-end-column="71" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Server/KeyManager/PubSubKeyManagerTreeType.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1110">
+          <caret line="642" column="8" selection-start-line="642" selection-start-column="8" selection-end-line="642" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test_key_dist/KeyManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="94" column="94" lean-forward="true" selection-start-line="91" selection-start-column="16" selection-end-line="94" selection-end-column="94" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/GroupController/GroupController.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="209" column="119" selection-start-line="209" selection-start-column="119" selection-end-line="209" selection-end-column="119" />
+        <state relative-caret-position="290">
+          <caret line="120" column="39" selection-start-line="120" selection-start-column="39" selection-end-line="120" selection-end-column="39" />
           <folding>
             <element signature="e#0#65#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Server/Registration/Registration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="104">
+          <caret line="63" column="11" selection-start-line="53" selection-start-column="10" selection-end-line="63" selection-end-column="11" />
+          <folding>
+            <element signature="e#36#49#0" expanded="true" />
           </folding>
         </state>
       </provider>

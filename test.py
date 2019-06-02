@@ -103,3 +103,9 @@ list_dict = [{"topic_to_sub": "123pub_sub0/3579b257-5fd2-48be-bff5-6e92277adf46_
 
 for list in list_dict:
     print(list['topic_to_sub']  )
+
+print(json.loads(b'"38405e86b4770b0758e2ea087935db1d2d7b41e1786bcabf6976a0a2b88ee802"'))
+print(list_dict.index({"topic_to_sub": "123pub_sub0/3579b257-5fd2-48be-bff5-6e92277adf46__changeParent__0", "enc_key": "7b955c8ae4f835e06ab59463c28d578ee83b4ec8d725fcc7fbebbf31e88cbf79"}))
+text = json.dumps("211adbe701873fb672027db921945ccbbfc8e1fab3b188f8f24c64bb0836b5a6").encode("utf-8", "ignore")
+print(json.loads(text.decode("utf-8", "ignore")))
+print(bytes.fromhex("5f4c48f1d2b6f8e6f15afe697e1e6e7c56e5e623b54b04ffadf1f8ddba09cc0c"))

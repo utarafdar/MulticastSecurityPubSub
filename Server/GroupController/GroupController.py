@@ -6,11 +6,13 @@ import json
 import copy
 from anytree import Node, findall_by_attr
 from nacl.encoding import HexEncoder
-
+import time
+import Server.CustomClasses.cryptography as crypto
 
 class DataSA:
     # todo GCKS public and private keys
-    GCKS_public_key = None
+    GCKS_Verify_Key = None
+    GCKS_Signing_Key = None
 
     def __init__(self, permissions, pairwise_key, key_management_type):
         self.key_management_type = key_management_type
@@ -33,9 +35,12 @@ class DataSA:
         self.change_tree_structure_topic = None
 
     @staticmethod
-    def set_gcks_public_key(public_key=None):
-        # DataSA.GCKS_public_key = generate_key() - todo
-        pass
+    def set_gcks_verify_key(gcks_verify_key):
+        DataSA.GCKS_Verify_Key = gcks_verify_key
+
+    @staticmethod
+    def set_gcks_signing_key(gcks_signing_key):
+        DataSA.GCKS_Signing_Key = gcks_signing_key
 
     def set_ancestor_keys(self, ancestor_keys):
         self.ancestor_keys = ancestor_keys.copy()
@@ -85,7 +90,7 @@ class MqttMesssageData:
 
     @staticmethod
     def initiate_mqtt_connection():
-        broker_address = "broker.mqttdashboard.com"  # use external broker
+        broker_address = "iot.eclipse.org"  # "broker.mqttdashboard.com"  # use external broker
         MqttMesssageData.publisher_GCKS = mqtt.Client("P3")  # create new instance
         MqttMesssageData.publisher_GCKS.connect(broker_address)
         MqttMesssageData.connected_mqtt = True
@@ -120,17 +125,31 @@ class MqttMesssageData:
         else:
             mqtt_message = message.hex()
 
-        message_to_bytes = json.dumps(mqtt_message)
-        print(message_to_bytes)
-        print(topic)
-        print(encryption_key)
-        print("rekey")
+        message_to_bytes = json.dumps(mqtt_message).encode('utf-8')
 
         if MqttMesssageData.connected_mqtt:
-                MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+                # digitally sign the encrypted message with GCKS signing key
+                signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key, message_to_bytes))
+                MqttMesssageData.publisher_GCKS.publish(topic, signed)
+                # MqttMesssageData.publisher_GCKS.publish(topic,  message_to_bytes)
+                print("sent message: " + json.dumps(mqtt_message))
+                print("sent topic: " + topic)
+                print("encryption key:")
+                print(encryption_key)
+
         else:
                 MqttMesssageData.initiate_mqtt_connection()
-                MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+                signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
+                                                                                                        message_to_bytes))
+                #verified = crypto.digital_sign_verify(bytes.fromhex(DataSA.GCKS_Verify_Key.hex()), signed)
+                print("signed message:")
+                print(signed)
+                MqttMesssageData.publisher_GCKS.publish(topic, signed)
+                #MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+                print("sent message: " + json.dumps(mqtt_message))
+                print("sent topic: " + topic)
+                print("encryption key:")
+                print(encryption_key)
 
     @staticmethod
     def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
@@ -162,13 +181,17 @@ class MqttMesssageData:
         if not MqttMesssageData.connected_mqtt:
             MqttMesssageData.initiate_mqtt_connection()
 
-        MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
+        # encrypt message and digitally sign it with GCKS signing key
+        signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
+                                                                                                json.dumps(data_sa_json).encode('utf-8')))
 
+        MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id),
+                                                signed)
+        # MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
+        print("message and topic :")
         print(json.dumps(data_sa_json))
-        print(new_rekey_topics)
-        print(encryption_key)
         print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
-        print("change str")
+
 
 
 class GroupController:
@@ -215,7 +238,7 @@ class GroupController:
                     message_to_bytes = message['changed_parent_key']'''
                 rekey_sa.changed_keys = ['changed_parent_key']
                 MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
-
+                # time.sleep(2)
                 # rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
                 # rekey_message.send_message()
         else:
@@ -267,11 +290,8 @@ class GroupController:
         ancestor_keys, topic_to_sub_enc_keys = GroupController.__get_ancestors_and_keys(ancestor_list, group,
                                                                                         tree_type_name, participant)
 
-
-        # data_sa.request_rekey_topic("--todo ") # --todo
         data_sa.key_management_type = KeyManagementProtocols.LKH.value
         data_sa.set_ancestor_keys(ancestor_keys)
-        data_sa.set_gcks_public_key("key") # todo
         data_sa.set_group_keys(ancestor_keys[0]['key'])
         data_sa.set_nonce_prefix(3) #-- todo
         data_sa.set_rekey_topics(topic_to_sub_enc_keys)

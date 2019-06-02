@@ -70,7 +70,7 @@ def Main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 65432
+    port = 65431
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     print("socket binded to post", port)
@@ -115,6 +115,7 @@ def __convert_data_sa_to_json(data_sa):
                     'nonce_prefix': data_sa.nonce_prefix,
                     'permissions': data_sa.permissions,
                     'pairwise_key': data_sa.pairwise_key.hex(),
+                    'gcks_verify_key': data_sa.GCKS_Verify_Key.hex(),
                     'ancestor_keys': data_sa.ancestor_keys[1:],
                     'group_keys': {'publisher_public_key': publisher_public_key,
                                    'subscriber_public_key': subscriber_public_key,

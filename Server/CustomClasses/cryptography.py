@@ -26,7 +26,6 @@ def decrypt_aes(key, enc_message):
 
 
 def encrypt_secret_key(key, message):
-
     box = nacl.secret.SecretBox(key)
     return box.encrypt(message)
 
@@ -114,14 +113,22 @@ print(decrypt_public_key(pkbob, skalice, enc_message))
 
 
 # Generate a new random signing key
-"""signing_key1 = nacl.signing.SigningKey.generate()
+signing_key1 = nacl.signing.SigningKey.generate()
 
 # Obtain the verify key for a given signing key
 verify_key = signing_key1.verify_key
 
 # Serialize the verify key to send it to a third party
-verify_key_hex = verify_key.encode(encoder=nacl.encoding.HexEncoder)
+"""verify_key_hex = None
+verify_key_hex1 = verify_key.encode(encoder=nacl.encoding.HexEncoder)
+verify_key_hex = verify_key_hex1
+print("here")
 
+print(verify_key_hex)
+print(verify_key_hex.hex())
+print(bytes.fromhex(verify_key_hex.hex()))
+print(type(verify_key_hex))
+print(type(signing_key1))
 signed = digital_sign_message(signing_key1, b"Kill all humans")
 print(signed)
 print(digital_sign_verify(verify_key_hex, signed))"""

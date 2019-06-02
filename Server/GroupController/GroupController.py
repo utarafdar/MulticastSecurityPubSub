@@ -341,7 +341,7 @@ class GroupController:
                                       'key': ancestor_list[i].tree_node.root_node_keys})
             else:
                 ancestor_keys.append({'name': str(ancestor_list[i].tree_node.node_id),
-                                      # nacl change
+                                      #  nacl change
                                       'key': ancestor_list[i].tree_node.node_key.hex()})
 
             if i != len(ancestor_list) - 1:

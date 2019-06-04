@@ -112,3 +112,11 @@ print(bytes.fromhex("5f4c48f1d2b6f8e6f15afe697e1e6e7c56e5e623b54b04ffadf1f8ddba0
 
 string = "abcd"
 print(string.encode("utf-8"))
+
+dic1 = {"test": "123",
+        "teste2": "345"}
+dic2 = {"topic": "xzy"}
+
+dic3 ={"msg": dic1,
+       "topic": "xzy"}
+print(dic3)

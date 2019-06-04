@@ -194,15 +194,17 @@ class KeyManager:
                     subscriber_private_key = PrivateKey.generate()
                     subscriber_public_key = subscriber_private_key.public_key
 
-
+        # here when not all are allowed to publish generate signing key
         if pub_sub_tree is True:
             if pub_sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
                 if publisher_public_key is not None:
-                    #publisher_private_key = nacl.signing.SigningKey.generate()
-                    #publisher_public_key = publisher_private_key.verify_key
-                    publisher_private_key = PrivateKey.generate()
-                    publisher_public_key = publisher_private_key.public_key
+                    if group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+                        publisher_private_key = nacl.signing.SigningKey.generate()
+                        publisher_public_key = publisher_private_key.verify_key
+                    else:
+                        publisher_private_key = PrivateKey.generate()
+                        publisher_public_key = publisher_private_key.public_key
 
             if pub_sub_tree_keys.subscriber_public_key is True:
                 if subscriber_public_key is not None:
@@ -413,10 +415,12 @@ class KeyManager:
                 return "error: invalid permissions"
             # first reset all the keys, depending on participant permissions set the tree updates
             common_keys_reset = generate_key()
-            #publisher_private_key_reset = nacl.signing.SigningKey.generate()
-            #publisher_public_key_reset = publisher_private_key_reset.verify_key
-            publisher_private_key_reset = PrivateKey.generate()
-            publisher_public_key_reset = publisher_private_key_reset.public_key
+            # when not all are allowed to publish, public and private key are signing and verifying key
+            publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.verify_key
+            #publisher_private_key_reset = PrivateKey.generate()
+            #publisher_public_key_reset = publisher_private_key_reset.public_key
+
             subscriber_keys_reset = {'common_key': common_keys_reset,
                                      'publisher_public_key': publisher_public_key_reset}
             pub_sub_keys_reset = {'common_key': common_keys_reset,

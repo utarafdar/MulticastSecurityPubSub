@@ -128,8 +128,11 @@ class MqttMesssageData:
                     mqtt_message['subscriber_private_key'] = value.encode(HexEncoder).decode()
         else:
             mqtt_message = message.hex()
-
-        message_to_bytes = json.dumps(mqtt_message).encode('utf-8')
+        # integrity of topic
+        message_and_topic = {"message": mqtt_message,
+                             "topic": topic}
+        #message_to_bytes = json.dumps(mqtt_message).encode('utf-8')
+        message_to_bytes = json.dumps(message_and_topic).encode('utf-8')
 
         if MqttMesssageData.connected_mqtt:
                 # digitally sign the encrypted message with GCKS signing key
@@ -171,16 +174,23 @@ class MqttMesssageData:
                 publisher_private_key = value.encode(HexEncoder).decode()
             if key is 'subscriber_private_key' and value is not None:
                 subscriber_private_key = value.encode(HexEncoder).decode()
+            if key is 'common_key' and value is not None:
+                common_key = value.hex()
 
-        data_sa_json = {
+        # topic integrity
+        keys = {
 
             'ancestor_keys': ancestor_keys[1:],
             'group_keys': {'publisher_public_key': publisher_public_key,
                            'subscriber_public_key': subscriber_public_key,
                            'publisher_private_key': publisher_private_key,
-                           'subscriber_private_key': subscriber_private_key},
+                           'subscriber_private_key': subscriber_private_key,
+                           'common_key': common_key},
             'rekey_topics': new_rekey_topics
         }
+        data_sa_json = {"message": keys,
+                        "topic": str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id)}
+
 
         if not MqttMesssageData.connected_mqtt:
             MqttMesssageData.initiate_mqtt_connection()

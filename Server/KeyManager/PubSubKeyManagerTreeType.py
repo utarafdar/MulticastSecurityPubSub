@@ -8,6 +8,7 @@ from .Protocols.LKH_Protocol import LKH
 import random
 import nacl.utils
 import nacl.secret
+import nacl.signing
 from nacl.public import PrivateKey, Box
 
 
@@ -168,6 +169,8 @@ class KeyManager:
             # private key
             if pub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
+                #publisher_private_key = nacl.signing.SigningKey.generate()
+                #publisher_public_key = publisher_private_key.verify_key
                 publisher_private_key = PrivateKey.generate()
                 publisher_public_key = publisher_private_key.public_key
 
@@ -180,6 +183,8 @@ class KeyManager:
             if sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
                 if publisher_public_key is not None:
+                    #publisher_private_key = nacl.signing.SigningKey.generate()
+                    #publisher_public_key = publisher_private_key.verify_key
                     publisher_private_key = PrivateKey.generate()
                     publisher_public_key = publisher_private_key.public_key
 
@@ -193,8 +198,9 @@ class KeyManager:
         if pub_sub_tree is True:
             if pub_sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
-                # todo -- find an appropriate method to generate ECC public and private keys
                 if publisher_public_key is not None:
+                    #publisher_private_key = nacl.signing.SigningKey.generate()
+                    #publisher_public_key = publisher_private_key.verify_key
                     publisher_private_key = PrivateKey.generate()
                     publisher_public_key = publisher_private_key.public_key
 
@@ -219,7 +225,7 @@ class KeyManager:
                 group_key_subscribers['subscriber_private_key'] = subscriber_private_key
 
             if pub_tree_keys.common_key is True:
-                group_key_subscribers['common_group_key'] = group_key_common
+                group_key_subscribers['common_key'] = group_key_common
 
             group_root_node_publishers.set_root_node_keys(group_key_publishers)
             group_tree_map.set_root_tree_publishers(group_root_node_publishers)  # also try to set the depth and no. children
@@ -239,7 +245,7 @@ class KeyManager:
                 group_key_subscribers['subscriber_private_key'] = subscriber_private_key
 
             if sub_tree_keys.common_key is True:
-                group_key_subscribers['common_group_key'] = group_key_common
+                group_key_subscribers['common_key'] = group_key_common
 
             group_root_node_subscribers.set_root_node_keys(group_key_subscribers)
             group_tree_map.set_root_tree_subscribers(group_root_node_subscribers)
@@ -259,7 +265,7 @@ class KeyManager:
                 group_key_pub_sub['subscriber_private_key'] = subscriber_private_key
 
             if pub_sub_tree_keys.common_key is True:
-                group_key_pub_sub['common_group_key'] = group_key_common
+                group_key_pub_sub['common_key'] = group_key_common
 
             group_root_node_pub_sub.set_root_node_keys(group_key_pub_sub)
             group_tree_map.set_root_tree_pub_sub(group_root_node_pub_sub)
@@ -407,6 +413,8 @@ class KeyManager:
                 return "error: invalid permissions"
             # first reset all the keys, depending on participant permissions set the tree updates
             common_keys_reset = generate_key()
+            #publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            #publisher_public_key_reset = publisher_private_key_reset.verify_key
             publisher_private_key_reset = PrivateKey.generate()
             publisher_public_key_reset = publisher_private_key_reset.public_key
             subscriber_keys_reset = {'common_key': common_keys_reset,
@@ -439,17 +447,16 @@ class KeyManager:
             # common key symmetric
             common_keys_reset = generate_key()
 
-            # generating asymmetric keys
-
-            publisher_private_key_reset = PrivateKey.generate()
-            publisher_public_key_reset = publisher_private_key_reset.public_key
+            # generating asymmetric keys for subscribers
+            # to remember changes ===here===
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
 
             pub_sub_keys_reset = {'common_key': common_keys_reset,
-                                  'publisher_public_key': publisher_public_key_reset,
-                                  'publisher_private_key': publisher_private_key_reset}
+                                  'subscriber_public_key': subscriber_private_key_reset,
+                                  'subscriber_private_key': subscriber_public_key_reset}
 
-            publisher_keys_reset = {'publisher_public_key': publisher_public_key_reset,
-                                    'publisher_private_key': publisher_private_key_reset,
+            publisher_keys_reset = {'subscriber_public_key': subscriber_private_key_reset,
                                     'common_key': common_keys_reset}
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
@@ -479,6 +486,8 @@ class KeyManager:
 
         elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
 
+            #publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            #publisher_public_key_reset = publisher_private_key_reset.verify_key
             publisher_private_key_reset = PrivateKey.generate()
             publisher_public_key_reset = publisher_private_key_reset.public_key
 
@@ -545,6 +554,8 @@ class KeyManager:
 
         elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
 
+            #publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            #publisher_public_key_reset = publisher_private_key_reset.verify_key
             publisher_private_key_reset = PrivateKey.generate()
             publisher_public_key_reset = publisher_private_key_reset.public_key
 
@@ -615,6 +626,8 @@ class KeyManager:
 
             common_keys_reset = generate_key()
 
+            #publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            #publisher_public_key_reset = publisher_private_key_reset.verify_key
             publisher_private_key_reset = PrivateKey.generate()
             publisher_public_key_reset = publisher_private_key_reset.public_key
 

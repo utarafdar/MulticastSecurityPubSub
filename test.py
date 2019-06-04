@@ -109,3 +109,6 @@ print(list_dict.index({"topic_to_sub": "123pub_sub0/3579b257-5fd2-48be-bff5-6e92
 text = json.dumps("211adbe701873fb672027db921945ccbbfc8e1fab3b188f8f24c64bb0836b5a6").encode("utf-8", "ignore")
 print(json.loads(text.decode("utf-8", "ignore")))
 print(bytes.fromhex("5f4c48f1d2b6f8e6f15afe697e1e6e7c56e5e623b54b04ffadf1f8ddba09cc0c"))
+
+string = "abcd"
+print(string.encode("utf-8"))

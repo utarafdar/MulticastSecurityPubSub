@@ -52,6 +52,7 @@ def threaded(conn):
         # serialize it
         print("test")
         data = __convert_data_sa_to_json(data_sa)
+        # todo -- store the participant id and permissions --
         conn.sendall(json.dumps(data).encode())
         #conn.sendall(pickle.dumps(data_sa))
         # print_lock.release()
@@ -100,6 +101,7 @@ def __convert_data_sa_to_json(data_sa):
     subscriber_public_key = None
     publisher_private_key = None
     subscriber_private_key = None
+    common_key = None
     for key, value in data_sa.ancestor_keys[0]['key'].items():
         if key is 'publisher_public_key' and value is not None:
             publisher_public_key = value.encode(HexEncoder).decode()
@@ -109,6 +111,8 @@ def __convert_data_sa_to_json(data_sa):
             publisher_private_key = value.encode(HexEncoder).decode()
         if key is 'subscriber_private_key' and value is not None:
             subscriber_private_key = value.encode(HexEncoder).decode()
+        if key is 'common_key' and value is not None:
+            common_key = value.hex()
 
 
     data_sa_json = {
@@ -120,10 +124,12 @@ def __convert_data_sa_to_json(data_sa):
                     'group_keys': {'publisher_public_key': publisher_public_key,
                                    'subscriber_public_key': subscriber_public_key,
                                    'publisher_private_key': publisher_private_key,
-                                   'subscriber_private_key': subscriber_private_key},
+                                   'subscriber_private_key': subscriber_private_key,
+                                   'common_key': common_key},
                     'rekey_topics': data_sa.rekey_topics_keys,
                     'subscriptions': data_sa.topics,
                     'group_id': data_sa.group_id,
+                    'type_of_group': data_sa.type_of_group,
                     'type_of_key_management': data_sa.key_management_type,
                     'change_tree_structure_topic': data_sa.change_tree_structure_topic,
                     'participant_id': data_sa.participant_id

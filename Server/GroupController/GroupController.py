@@ -33,6 +33,7 @@ class DataSA:
         self.rekey_topics_keys = list()
         self.request_rekey_topic = None
         self.change_tree_structure_topic = None
+        self.type_of_group = None
 
     @staticmethod
     def set_gcks_verify_key(gcks_verify_key):
@@ -63,6 +64,9 @@ class DataSA:
     def set_pairwise_key(self, pairwise_key):
         self.pairwise_key = pairwise_key
 
+    def set_type_of_group(self, type_of_group):
+        self.type_of_group = type_of_group
+
     def set_participant_id(self, participant_id):
         self.participant_id = participant_id
 
@@ -75,7 +79,7 @@ class DataSA:
         self.group_id = str(group_id)
 
     def set_change_tree_structure_topic(self, group_id, participant_id):
-        self.change_tree_structure_topic = "changeGroupStructure__"+str(group_id)+"__/"+str(participant_id)
+        self.change_tree_structure_topic = str(group_id)+"__" +"changeGroupStructure"+"/"+str(participant_id)
 
 
 class RekeySa:
@@ -185,7 +189,7 @@ class MqttMesssageData:
         signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
                                                                                                 json.dumps(data_sa_json).encode('utf-8')))
 
-        MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id),
+        MqttMesssageData.publisher_GCKS.publish(str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id),
                                                 signed)
         # MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
         print("message and topic :")
@@ -224,7 +228,7 @@ class GroupController:
 
         if result['tree_structure_change'] is False:
             for message in result['add_participant'][0]:
-                update_msg_topic_name = str(group.id) + result['add_participant'][1]['tree_type'] + message[
+                update_msg_topic_name = str(group.id)+"__" + result['add_participant'][1]['tree_type'] + message[
                     'message_name']
                 # todo - nonce range logic
                 rekey_sa = RekeySa(3)
@@ -263,7 +267,7 @@ class GroupController:
         # update other trees where group keys changed
         for trees in result['update_tree']:
             for message in trees[0]:
-                update_msg_topic_name = group.group_id + trees[1]['tree_type'] + message['message_name']
+                update_msg_topic_name = group.group_id+"__" + trees[1]['tree_type'] + message['message_name']
                 msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
                 rekey_sa = RekeySa(3)
                 # not here
@@ -301,6 +305,7 @@ class GroupController:
         data_sa.set_participant_id(participant.participant_id)
         data_sa.set_group_topics(group.topics)
         data_sa.set_group_id(group.id)
+        data_sa.set_type_of_group(group.type_of_pub_sub_group)
         data_sa.set_change_tree_structure_topic(group.id, participant.participant_id)
         return data_sa
 
@@ -345,7 +350,7 @@ class GroupController:
                                       'key': ancestor_list[i].tree_node.node_key.hex()})
 
             if i != len(ancestor_list) - 1:
-                topic_to_sub_enc_keys.append({'topic_to_sub': group.id + tree_type_name +
+                topic_to_sub_enc_keys.append({'topic_to_sub': group.id+"__"+tree_type_name +
                                                               str(ancestor_list[
                                                                       i].tree_node.node_id) + '/' +
                                                               str(ancestor_list[i + 1].tree_node.node_id) +
@@ -357,7 +362,7 @@ class GroupController:
                                               'enc_key': ancestor_list[i + 1].tree_node.node_key.hex()})
 
             else:
-                topic_to_sub_enc_keys.append({'topic_to_sub': group.id + tree_type_name +
+                topic_to_sub_enc_keys.append({'topic_to_sub': group.id+"__" + tree_type_name +
                                                               str(ancestor_list[
                                                                       i].tree_node.node_id) + '/' +
                                                               participant.participant_id + "__changeParent__" +

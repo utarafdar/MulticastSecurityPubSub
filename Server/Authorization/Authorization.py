@@ -30,8 +30,8 @@ class Authorization:
     @staticmethod
     def initializer():
         from Server.CustomClasses.Topic import Topic
-        topic = Topic("test")
-        topic2 = Topic("test")
+        topic = Topic("test123456789")
+        topic2 = Topic("test6789")
         group1 = Authorization.create_group("testGroup", "123", type_of_key_management_protocol=2,
                                            type_of_pub_sub_group=4)
         group1.add_topic(topic)

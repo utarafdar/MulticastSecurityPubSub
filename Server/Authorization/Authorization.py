@@ -23,6 +23,8 @@ class Authorization:
     def authorization_permissions(participant, group_id):
         group = [x for x in Authorization.groups if x.id == group_id][0]
         permission = random.randint(1, 3)
+        if permission == 2:
+            permission = permission-1
         return permission, participant, group
 
     @staticmethod

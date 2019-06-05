@@ -156,3 +156,10 @@ print(mac0)
 print(mac1)
 print(mac2)
 
+listo = list()
+list1 = ['a','b']
+list2 = ['c', 'd']
+listo.extend(list1)
+list2.extend(list1)
+print(listo)
+print(list2)

@@ -130,3 +130,4 @@ b = Node("b", parent=f)
 #c = Node("c", parent=b)
 #d = Node("d", parent=b)
 print(b.root)
+

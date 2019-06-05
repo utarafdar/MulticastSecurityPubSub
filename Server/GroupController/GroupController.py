@@ -1,6 +1,6 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
-from Server.CustomClasses.CustomEnums import KeyManagementProtocols, TypeOfPubSubGroupEnum
+from Server.CustomClasses.CustomEnums import KeyManagementProtocols, TypeOfPubSubGroupEnum, PermissionTypesEnum
 import paho.mqtt.client as mqtt
 import json
 import copy
@@ -34,6 +34,7 @@ class DataSA:
         self.request_rekey_topic = None
         self.change_tree_structure_topic = None
         self.type_of_group = None
+        self.rekey_gkmp_topic = None
 
     @staticmethod
     def set_gcks_verify_key(gcks_verify_key):
@@ -115,8 +116,8 @@ class MqttMesssageData:
 
     @staticmethod
     def send_rekey_message(message, topic, encryption_key):
-        # print(message)
-        # print(topic)
+        print(message)
+        print(topic)
         if type(message) is dict:
             mqtt_message = dict()
             for key, value in message.items():
@@ -285,14 +286,6 @@ class GroupController:
                 # print(str(group.id)+"__" + trees[1]['tree_type'] + message['message_name'])
                 # msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
                 rekey_sa = RekeySa(3)
-                # not here
-                '''if type(message['changed_parent_key']) is dict:
-                    # nacl change
-                    # message_to_bytes = json.dumps(message['changed_parent_key'])
-                    message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
-                    rekey_sa.changed_keys = message_to_bytes
-                else:
-                    message_to_bytes = message['changed_parent_key']'''
                 print(update_msg_topic_name)
                 rekey_sa.changed_keys = message['changed_parent_key']
                 MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
@@ -327,8 +320,36 @@ class GroupController:
         return data_sa
 
     @staticmethod
-    def add_participant_gkmp():
-        pass
+    def add_participant_gkmp(group, participant, permissions):
+        result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, True, False)
+
+        for message_data in result[0]:
+            MqttMesssageData.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
+                                                message_data['encryption_key'])
+        participant_group_keys = result[1]
+        # now return to registration DATA SA
+        data_sa = DataSA(permissions, participant.pairwise_key, "GKMP")
+
+        data_sa.key_management_type = KeyManagementProtocols.GKMP.value
+        data_sa.set_nonce_prefix(3)  # -- todo
+        if permissions is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
+            pub_sub_grp_type = "pub_sub"
+        elif permissions is PermissionTypesEnum.PUBLISH.value:
+            pub_sub_grp_type = "pub"
+        else:
+            pub_sub_grp_type = "sub"
+
+        data_sa.rekey_gkmp_topic = group.id + "__" + pub_sub_grp_type + "/gkmp_key_change/" + participant.participant_id
+        data_sa.set_subscriptions(group.topics)
+        data_sa.set_group_keys(participant_group_keys)
+        data_sa.set_request_rekey_topic("todo")
+        data_sa.set_pairwise_key(participant.pairwise_key)
+        data_sa.set_participant_id(participant.participant_id)
+        data_sa.set_group_topics(group.topics)
+        data_sa.set_group_id(group.id)
+        data_sa.set_type_of_group(group.type_of_pub_sub_group)
+        return data_sa
+
 
     @staticmethod
     def delete_participant_lkh():

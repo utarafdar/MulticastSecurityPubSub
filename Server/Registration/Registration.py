@@ -4,6 +4,7 @@ from Server.Authorization.Authorization import Authorization
 from Server.CustomClasses.Topic import Topic
 from Server.GroupController.GroupController import GroupController
 from Server.CustomClasses.Participant import Participant
+from Server.CustomClasses.CustomEnums import KeyManagementProtocols
 
 # import thread module
 from _thread import *
@@ -39,7 +40,12 @@ def threaded(conn):
         permission = results[0]
         group = results[2]
         # cannot decide this here add lkh or gkmp-- todo
-        data_sa = GroupController.add_participant_lkh(group, participant, permission)
+        data_sa = None
+        if group.type_of_key_management_protocol is KeyManagementProtocols.LKH.value:
+            data_sa = GroupController.add_participant_lkh(group, participant, permission)
+
+        if group.type_of_key_management_protocol is KeyManagementProtocols.GKMP.value:
+            data_sa = GroupController.add_participant_gkmp(group, participant, permission)
 
         # send request to authentication
         # receive permissions group
@@ -49,7 +55,7 @@ def threaded(conn):
 
         # convert data sa to json
         # serialize it
-        data = __convert_data_sa_to_json(data_sa)
+        data = __convert_data_sa_to_json(data_sa, group.type_of_key_management_protocol)
         # todo -- store the participant id and permissions --
         conn.sendall(json.dumps(data).encode())
         #conn.sendall(pickle.dumps(data_sa))
@@ -69,7 +75,7 @@ def Main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 65432
+    port = 65431
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     # print("socket binded to post", port)
@@ -94,44 +100,79 @@ def Main():
     s.close()
 
 
-def __convert_data_sa_to_json(data_sa):
+def __convert_data_sa_to_json(data_sa, key_management_prototcol):
     publisher_public_key = None
     subscriber_public_key = None
     publisher_private_key = None
     subscriber_private_key = None
     common_key = None
-    for key, value in data_sa.ancestor_keys[0]['key'].items():
-        if key is 'publisher_public_key' and value is not None:
-            publisher_public_key = value.encode(HexEncoder).decode()
-        if key is 'subscriber_public_key' and value is not None:
-            subscriber_public_key = value.encode(HexEncoder).decode()
-        if key is 'publisher_private_key' and value is not None:
-            publisher_private_key = value.encode(HexEncoder).decode()
-        if key is 'subscriber_private_key' and value is not None:
-            subscriber_private_key = value.encode(HexEncoder).decode()
-        if key is 'common_key' and value is not None:
-            common_key = value.hex()
+    data_sa_json = None
+
+    if key_management_prototcol is KeyManagementProtocols.LKH.value:
+        for key, value in data_sa.ancestor_keys[0]['key'].items():
+            if key is 'publisher_public_key' and value is not None:
+                publisher_public_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_public_key' and value is not None:
+                subscriber_public_key = value.encode(HexEncoder).decode()
+            if key is 'publisher_private_key' and value is not None:
+                publisher_private_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_private_key' and value is not None:
+                subscriber_private_key = value.encode(HexEncoder).decode()
+            if key is 'common_key' and value is not None:
+                common_key = value.hex()
 
 
-    data_sa_json = {
-                    'nonce_prefix': data_sa.nonce_prefix,
-                    'permissions': data_sa.permissions,
-                    'pairwise_key': data_sa.pairwise_key.hex(),
-                    'gcks_verify_key': data_sa.GCKS_Verify_Key.hex(),
-                    'ancestor_keys': data_sa.ancestor_keys[1:],
-                    'group_keys': {'publisher_public_key': publisher_public_key,
-                                   'subscriber_public_key': subscriber_public_key,
-                                   'publisher_private_key': publisher_private_key,
-                                   'subscriber_private_key': subscriber_private_key,
-                                   'common_key': common_key},
-                    'rekey_topics': data_sa.rekey_topics_keys,
-                    'subscriptions': data_sa.topics,
-                    'group_id': data_sa.group_id,
-                    'type_of_group': data_sa.type_of_group,
-                    'type_of_key_management': data_sa.key_management_type,
-                    'change_tree_structure_topic': data_sa.change_tree_structure_topic,
-                    'participant_id': data_sa.participant_id
-    }
+        data_sa_json = {
+                        'nonce_prefix': data_sa.nonce_prefix,
+                        'permissions': data_sa.permissions,
+                        'pairwise_key': data_sa.pairwise_key.hex(),
+                        'gcks_verify_key': data_sa.GCKS_Verify_Key.hex(),
+                        'ancestor_keys': data_sa.ancestor_keys[1:],
+                        'group_keys': {'publisher_public_key': publisher_public_key,
+                                       'subscriber_public_key': subscriber_public_key,
+                                       'publisher_private_key': publisher_private_key,
+                                       'subscriber_private_key': subscriber_private_key,
+                                       'common_key': common_key},
+                        'rekey_topics': data_sa.rekey_topics_keys,
+                        'subscriptions': data_sa.topics,
+                        'group_id': data_sa.group_id,
+                        'type_of_group': data_sa.type_of_group,
+                        'type_of_key_management': data_sa.key_management_type,
+                        'change_tree_structure_topic': data_sa.change_tree_structure_topic,
+                        'participant_id': data_sa.participant_id
+        }
+
+    if key_management_prototcol is KeyManagementProtocols.GKMP.value:
+        for key, value in data_sa.group_keys.items():
+            if key is 'publisher_public_key' and value is not None:
+                publisher_public_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_public_key' and value is not None:
+                subscriber_public_key = value.encode(HexEncoder).decode()
+            if key is 'publisher_private_key' and value is not None:
+                publisher_private_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_private_key' and value is not None:
+                subscriber_private_key = value.encode(HexEncoder).decode()
+            if key is 'common_key' and value is not None:
+                common_key = value.hex()
+
+        data_sa_json = {
+            'nonce_prefix': data_sa.nonce_prefix,
+            'permissions': data_sa.permissions,
+            'pairwise_key': data_sa.pairwise_key.hex(),
+            'gcks_verify_key': data_sa.GCKS_Verify_Key.hex(),
+            'group_keys': {'publisher_public_key': publisher_public_key,
+                           'subscriber_public_key': subscriber_public_key,
+                           'publisher_private_key': publisher_private_key,
+                           'subscriber_private_key': subscriber_private_key,
+                           'common_key': common_key},
+            'rekey_topic': data_sa.rekey_gkmp_topic,
+            'subscriptions': data_sa.topics,
+            'group_id': data_sa.group_id,
+            'type_of_group': data_sa.type_of_group,
+            'type_of_key_management': data_sa.key_management_type,
+            'participant_id': data_sa.participant_id
+        }
+
     return data_sa_json
 
 

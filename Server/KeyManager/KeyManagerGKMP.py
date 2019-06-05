@@ -46,6 +46,7 @@ class KeyManagerGKMP:
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
             group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
 
+            # digital signatures here
             asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
             group_gkmp_map.publisher_private_key = asymmetric_keys[0]
             group_gkmp_map.publisher_public_key = asymmetric_keys[1]
@@ -89,6 +90,7 @@ class KeyManagerGKMP:
     @staticmethod
     def add_or_delete_participant(group, participant, participant_permission, add_participant=False,
                                   delete_participant=False):
+        messages = list()
         if add_participant is False and delete_participant is False:
             return "error"
 
@@ -96,18 +98,23 @@ class KeyManagerGKMP:
 
         if group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
 
+            added_participant_keys = None
+
             if delete_participant is True:
                 deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if x.particpaint_id == participant.participant_id][0]
                 group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
 
             group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
-            changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
                                          'participant_list': group_gkmp_map.publishers_and_subscribers}
 
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
 
             if add_participant is True:
                 group_gkmp_map.publishers_and_subscribers.append(participant)
+                added_participant_keys = {'common_key': group_gkmp_map.common_key}
+
+            return messages, added_participant_keys
 
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
             # publishers - commonkey and sub public key
@@ -132,31 +139,48 @@ class KeyManagerGKMP:
                 else:
                     return "error wrong permission"
             # for publishers
-            changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
                                          'subscriber_public_key' : group_gkmp_map.subscriber_public_key,
                                          'participant_list': group_gkmp_map.publishers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
             # for publishers and subscribers
-            changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
                                          'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'subscriber_private_key': group_gkmp_map.subscriber_private_key,
                                          'participant_list': group_gkmp_map.publishers_and_subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
 
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
+
+            added_participant_keys = None
             if add_participant is True:
                 if participant_permission is PermissionTypesEnum.PUBLISH.value:
                     group_gkmp_map.publishers.append(participant)
+                    added_participant_keys = {'common_key': group_gkmp_map.common_key,
+                                              'subscriber_public_key' : group_gkmp_map.subscriber_public_key}
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     group_gkmp_map.publishers_and_subscribers.append(participant)
+                    added_participant_keys = {'common_key': group_gkmp_map.common_key,
+                                              'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                              'subscriber_private_key': group_gkmp_map.subscriber_private_key}
                 else:
                     return "error wrong permission"
 
+            return messages, added_participant_keys
+
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+
+            added_participant_keys = None
+
+            # NEED TO GENERATE SIGNING KEYS HERE
             group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
 
-            asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
-            group_gkmp_map.publisher_private_key = asymmetric_keys[0]
-            group_gkmp_map.publisher_public_key = asymmetric_keys[1]
+            # publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            # publisher_public_key_reset = publisher_private_key_reset.verify_key
+            # asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.publisher_private_key = nacl.signing.SigningKey.generate()
+            group_gkmp_map.publisher_public_key = group_gkmp_map.publisher_private_key.verify_key
 
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
@@ -172,26 +196,37 @@ class KeyManagerGKMP:
                 else:
                     return "error wrong permission"
 
-            changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'participant_list': group_gkmp_map.subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
             # for publishers and subscribers
-            changed_keys_participants = {'group_common_key': group_gkmp_map.common_key,
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'publisher_private_key': group_gkmp_map.publisher_private_key,
                                          'participant_list': group_gkmp_map.publishers_and_subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
-
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
             if add_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     group_gkmp_map.subscribers.append(participant)
+                    added_participant_keys ={'common_key': group_gkmp_map.common_key,
+                                             'publisher_public_key': group_gkmp_map.publisher_public_key}
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     group_gkmp_map.publishers_and_subscribers.append(participant)
+                    added_participant_keys = {'common_key': group_gkmp_map.common_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                              'publisher_private_key': group_gkmp_map.publisher_private_key}
+
                 else:
                     return "error wrong permission"
 
+            return messages, added_participant_keys
+
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
+
+            added_participant_keys = None
+
             # publishers 3 keys, subscribers 3 keys
             asymmetric_keys_sub = KeyManagerGKMP.__generate_asymmetric_keys()
             group_gkmp_map.subscriber_private_key = asymmetric_keys_sub[0]
@@ -219,23 +254,33 @@ class KeyManagerGKMP:
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'participant_list': group_gkmp_map.publishers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
             # for publishers and subscribers
             changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'subscriber_private_key': group_gkmp_map.subscriber_private_key,
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'participant_list': group_gkmp_map.subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
 
             if add_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     group_gkmp_map.subscribers.append(participant)
+                    added_participant_keys = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                              'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key}
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH.value:
                     group_gkmp_map.publishers.append(participant)
+                    added_participant_keys = {'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                              'subscriber_public_key': group_gkmp_map.subscriber_public_key}
                 else:
                     return "error wrong permission"
+            return messages, added_participant_keys
 
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+
+            added_participant_keys = None
 
             if delete_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
@@ -268,31 +313,45 @@ class KeyManagerGKMP:
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'participant_list': group_gkmp_map.publishers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
 
             changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'subscriber_private_key': group_gkmp_map.subscriber_private_key,
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'participant_list': group_gkmp_map.subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
 
             changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
                                          'subscriber_private_key': group_gkmp_map.subscriber_private_key,
                                          'publisher_public_key': group_gkmp_map.publisher_public_key,
                                          'publisher_private_key': group_gkmp_map.publisher_private_key,
                                          'participant_list': group_gkmp_map.publishers_and_subscribers}
-            KeyManagerGKMP.__send_messages(changed_keys_participants, group.group_name)
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
 
             if add_participant is True:
                 if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                     group_gkmp_map.subscribers.append(participant)
+                    added_participant_keys = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                              'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key}
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH.value:
                     group_gkmp_map.publishers.append(participant)
+                    added_participant_keys = {'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                              'subscriber_public_key': group_gkmp_map.subscriber_public_key}
+
                 elif participant_permission is PermissionTypesEnum.PUBLISH_AND_SUBSCRIBE.value:
                     group_gkmp_map.publishers_and_subscribers.append(participant)
+                    added_participant_keys = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                              'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                              'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                              'publisher_private_key': group_gkmp_map.publisher_private_key}
+
                 else:
                     return "error wrong permission"
 
+                return messages, added_participant_keys
 
         # handle edge cases
         elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
@@ -325,7 +384,7 @@ class KeyManagerGKMP:
         return private_key, public_key
 
     @staticmethod
-    def __send_messages(changed_keys_participants, group_name):
+    def __send_messages(changed_keys_participants, group_name, pub_sub_grp_type):
         messages = list()
         changed_keys = dict()
         for key, value in changed_keys_participants.items():
@@ -333,7 +392,7 @@ class KeyManagerGKMP:
                 changed_keys[key] = value
 
         for participant in changed_keys_participants['participant_list']:
-            message_detail = {"message_name": group_name + "/gkmp change"+"/" + participant.participant_id,
+            message_detail = {"message_name":  group_name + "__" + pub_sub_grp_type + "/gkmp_key_change/" + participant.participant_id,
                               "encryption_key": participant.pairwise_key,
                               "changed_parent_key": changed_keys}
             messages.append(message_detail)

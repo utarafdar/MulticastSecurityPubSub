@@ -163,42 +163,13 @@ class KeyManager:
             group_tree_map.set_root_tree_common(group_root_node_common)
             # call function next - not here, recheck
 
+        # generate common group key
+        group_key_common = generate_key()
         # generate all the keys
-        if pub_tree is True:
-            # checking only public key will suffice, because if there is a public key, there will definitely be a
-            # private key
-            if pub_tree_keys.publisher_public_key is True:
-                # generate public and private keys
-                #publisher_private_key = nacl.signing.SigningKey.generate()
-                #publisher_public_key = publisher_private_key.verify_key
-                publisher_private_key = PrivateKey.generate()
-                publisher_public_key = publisher_private_key.public_key
-
-            if pub_tree_keys.subscriber_public_key is True:
-                # generate public private keys
-                subscriber_private_key = PrivateKey.generate()
-                subscriber_public_key = subscriber_private_key.public_key
-
-        if sub_tree is True:
-            if sub_tree_keys.publisher_public_key is True:
-                # generate public and private keys
-                if publisher_public_key is not None:
-                    #publisher_private_key = nacl.signing.SigningKey.generate()
-                    #publisher_public_key = publisher_private_key.verify_key
-                    publisher_private_key = PrivateKey.generate()
-                    publisher_public_key = publisher_private_key.public_key
-
-            if sub_tree_keys.subscriber_public_key is True:
-                if subscriber_public_key is not None:
-                    # generate public private keys
-                    subscriber_private_key = PrivateKey.generate()
-                    subscriber_public_key = subscriber_private_key.public_key
-
-        # here when not all are allowed to publish generate signing key
         if pub_sub_tree is True:
             if pub_sub_tree_keys.publisher_public_key is True:
                 # generate public and private keys
-                if publisher_public_key is not None:
+                if publisher_public_key is None:
                     if group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
                         publisher_private_key = nacl.signing.SigningKey.generate()
                         publisher_public_key = publisher_private_key.verify_key
@@ -207,10 +178,45 @@ class KeyManager:
                         publisher_public_key = publisher_private_key.public_key
 
             if pub_sub_tree_keys.subscriber_public_key is True:
-                if subscriber_public_key is not None:
+                if subscriber_public_key is None:
                     # generate public private keys
                     subscriber_private_key = PrivateKey.generate()
                     subscriber_public_key = subscriber_private_key.public_key
+
+        if pub_tree is True:
+            # checking only public key will suffice, because if there is a public key, there will definitely be a
+            # private key
+            if pub_tree_keys.publisher_public_key is True:
+                # generate public and private keys
+                #publisher_private_key = nacl.signing.SigningKey.generate()
+                #publisher_public_key = publisher_private_key.verify_key
+                if publisher_public_key is None:
+                    publisher_private_key = PrivateKey.generate()
+                    publisher_public_key = publisher_private_key.public_key
+
+            if pub_tree_keys.subscriber_public_key is True:
+                # generate public private keys
+                if subscriber_public_key is None:
+                    subscriber_private_key = PrivateKey.generate()
+                    subscriber_public_key = subscriber_private_key.public_key
+
+        if sub_tree is True:
+            if sub_tree_keys.publisher_public_key is True:
+                # generate public and private keys
+                if publisher_public_key is None:
+                    #publisher_private_key = nacl.signing.SigningKey.generate()
+                    #publisher_public_key = publisher_private_key.verify_key
+                    publisher_private_key = PrivateKey.generate()
+                    publisher_public_key = publisher_private_key.public_key
+
+            if sub_tree_keys.subscriber_public_key is True:
+                if subscriber_public_key is None:
+                    # generate public private keys
+                    subscriber_private_key = PrivateKey.generate()
+                    subscriber_public_key = subscriber_private_key.public_key
+
+        # here when not all are allowed to publish generate signing key
+
 
         if pub_tree is True:
             group_root_node_publishers = TreeNode('0', root_node=True)
@@ -328,8 +334,8 @@ class KeyManager:
                     participants.append(participant[0])
                     group_tree_map.group.add_participant(participant[0], participant[1])
 
-            if common_tree_depth is None or common_tree_no_children is None:
-                return "error: tree size not specified"
+            #if common_tree_depth is None or common_tree_no_children is None:
+                #return "error: tree size not specified"
 
             LKH.generate_tree(group_tree_map.root_tree_common, common_tree_depth, common_tree_no_children, participants)
 
@@ -418,14 +424,25 @@ class KeyManager:
             # when not all are allowed to publish, public and private key are signing and verifying key
             publisher_private_key_reset = nacl.signing.SigningKey.generate()
             publisher_public_key_reset = publisher_private_key_reset.verify_key
+            '''subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key'''
             #publisher_private_key_reset = PrivateKey.generate()
             #publisher_public_key_reset = publisher_private_key_reset.public_key
 
             subscriber_keys_reset = {'common_key': common_keys_reset,
                                      'publisher_public_key': publisher_public_key_reset}
+            '''subscriber_keys_reset = {'subscriber_private_key': subscriber_private_key_reset,
+                                     'subscriber_public_key':subscriber_public_key_reset,
+                                     'publisher_public_key': publisher_public_key_reset}'''
+
             pub_sub_keys_reset = {'common_key': common_keys_reset,
                                   'publisher_public_key': publisher_public_key_reset,
                                   'publisher_private_key': publisher_private_key_reset}
+
+            '''pub_sub_keys_reset = {'subscriber_private_key': subscriber_private_key_reset,
+                                  'subscriber_public_key':subscriber_public_key_reset,
+                                  'publisher_public_key': publisher_public_key_reset,
+                                  'publisher_private_key': publisher_private_key_reset}'''
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                 trees_data_to_be_updated.append({'tree': group_tree_map.root_tree_subscribers,
@@ -453,15 +470,28 @@ class KeyManager:
 
             # generating asymmetric keys for subscribers
             # to remember changes ===here===
+            '''subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key'''
+            '''publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key'''
             subscriber_private_key_reset = PrivateKey.generate()
             subscriber_public_key_reset = subscriber_private_key_reset.public_key
 
             pub_sub_keys_reset = {'common_key': common_keys_reset,
-                                  'subscriber_public_key': subscriber_private_key_reset,
-                                  'subscriber_private_key': subscriber_public_key_reset}
+                                  'subscriber_public_key': subscriber_public_key_reset,
+                                  'subscriber_private_key': subscriber_private_key_reset}
+
+            '''pub_sub_keys_reset = {'publisher_private_key': publisher_private_key_reset,
+                                  'publisher_public_key': publisher_public_key_reset,
+                                  'subscriber_public_key': subscriber_public_key_reset,
+                                  'subscriber_private_key': subscriber_private_key_reset}'''
 
             publisher_keys_reset = {'subscriber_public_key': subscriber_private_key_reset,
                                     'common_key': common_keys_reset}
+
+            '''publisher_keys_reset = {'subscriber_public_key': subscriber_private_key_reset,
+                                    'publisher_private_key': publisher_private_key_reset,
+                                    'publisher_public_key': publisher_public_key_reset}'''
 
             if participant_permission is PermissionTypesEnum.SUBSCRIBE.value:
                 return "error: invalid permission"

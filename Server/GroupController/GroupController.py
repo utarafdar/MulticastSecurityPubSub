@@ -1,6 +1,6 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
-from Server.CustomClasses.CustomEnums import KeyManagementProtocols
+from Server.CustomClasses.CustomEnums import KeyManagementProtocols, TypeOfPubSubGroupEnum
 import paho.mqtt.client as mqtt
 import json
 import copy
@@ -126,6 +126,8 @@ class MqttMesssageData:
                     mqtt_message['publisher_private_key'] = value.encode(HexEncoder).decode()
                 if key is 'subscriber_private_key' and value is not None:
                     mqtt_message['subscriber_private_key'] = value.encode(HexEncoder).decode()
+                if key is 'common_key' and value is not None:
+                    mqtt_message['common_key'] = value.hex()
         else:
             mqtt_message = message.hex()
         # integrity of topic
@@ -165,6 +167,7 @@ class MqttMesssageData:
         subscriber_public_key = None
         publisher_private_key = None
         subscriber_private_key = None
+        common_key = None
         for key, value in ancestor_keys[0]['key'].items():
             if key is 'publisher_public_key' and value is not None:
                 publisher_public_key = value.encode(HexEncoder).decode()
@@ -233,8 +236,12 @@ class GroupController:
             tree = copy.deepcopy(group_tree_map.root_tree_subscribers)
             tree_type_name = 'sub'
         if permissions is 3:
-            tree = copy.deepcopy(group_tree_map.root_tree_pub_sub)
-            tree_type_name = 'pub_sub'
+            if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+                tree = copy.deepcopy(group_tree_map.root_tree_common)
+                tree_type_name = 'common'
+            else:
+                tree = copy.deepcopy(group_tree_map.root_tree_pub_sub)
+                tree_type_name = 'pub_sub'
 
         if result['tree_structure_change'] is False:
             for message in result['add_participant'][0]:
@@ -276,21 +283,22 @@ class GroupController:
 
         # update other trees where group keys changed
         for trees in result['update_tree']:
-            for message in trees[0]:
-                update_msg_topic_name = group.group_id+"__" + trees[1]['tree_type'] + message['message_name']
-                msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
-                rekey_sa = RekeySa(3)
-                # not here
-                '''if type(message['changed_parent_key']) is dict:
-                    # nacl change
-                    # message_to_bytes = json.dumps(message['changed_parent_key'])
-                    message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
-                    rekey_sa.changed_keys = message_to_bytes
-                else:
-                    message_to_bytes = message['changed_parent_key']'''
-                rekey_sa.changed_keys = message['changed_parent_key']
-                rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
-                rekey_message.send_message()
+            if result['update_tree'] is not None:
+                for message in trees[0]:
+                    update_msg_topic_name = group.group_id+"__" + trees[1]['tree_type'] + message['message_name']
+                    msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
+                    rekey_sa = RekeySa(3)
+                    # not here
+                    '''if type(message['changed_parent_key']) is dict:
+                        # nacl change
+                        # message_to_bytes = json.dumps(message['changed_parent_key'])
+                        message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
+                        rekey_sa.changed_keys = message_to_bytes
+                    else:
+                        message_to_bytes = message['changed_parent_key']'''
+                    rekey_sa.changed_keys = message['changed_parent_key']
+                    rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
+                    rekey_message.send_message()
 
         # now return to registration DATA SA
         data_sa = DataSA(permissions, participant.pairwise_key, "LKH")

@@ -120,3 +120,7 @@ dic2 = {"topic": "xzy"}
 dic3 ={"msg": dic1,
        "topic": "xzy"}
 print(dic3)
+
+x = "abds"
+if not x is  None:
+    print("true")

@@ -486,7 +486,7 @@ class KeyManager:
                                   'subscriber_public_key': subscriber_public_key_reset,
                                   'subscriber_private_key': subscriber_private_key_reset}'''
 
-            publisher_keys_reset = {'subscriber_public_key': subscriber_private_key_reset,
+            publisher_keys_reset = {'subscriber_public_key': subscriber_public_key_reset,
                                     'common_key': common_keys_reset}
 
             '''publisher_keys_reset = {'subscriber_public_key': subscriber_private_key_reset,

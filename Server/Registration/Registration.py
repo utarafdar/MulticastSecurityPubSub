@@ -28,7 +28,6 @@ def threaded(conn):
         data = conn.recv(1024)
         if not data:
             break
-        print(data.decode('utf-8'))
         # participant = pickle.loads(data)
         group_id = "123"
         # generate participant Id and pairwise key
@@ -50,7 +49,6 @@ def threaded(conn):
 
         # convert data sa to json
         # serialize it
-        print("test")
         data = __convert_data_sa_to_json(data_sa)
         # todo -- store the participant id and permissions --
         conn.sendall(json.dumps(data).encode())
@@ -71,10 +69,10 @@ def Main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 65431
+    port = 65432
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
-    print("socket binded to post", port)
+    # print("socket binded to post", port)
 
     # put the socket into listening mode
     s.listen(5)

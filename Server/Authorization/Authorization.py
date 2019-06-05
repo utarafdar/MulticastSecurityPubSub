@@ -22,9 +22,7 @@ class Authorization:
     @staticmethod
     def authorization_permissions(participant, group_id):
         group = [x for x in Authorization.groups if x.id == group_id][0]
-        permission = 3
-        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB:
-            permission = random.randint(1, 3)
+        permission = random.randint(1, 3)
         return permission, participant, group
 
     @staticmethod

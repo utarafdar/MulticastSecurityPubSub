@@ -124,3 +124,9 @@ print(dic3)
 x = "abds"
 if not x is  None:
     print("true")
+
+f = Node("f")
+b = Node("b", parent=f)
+#c = Node("c", parent=b)
+#d = Node("d", parent=b)
+print(b.root)

@@ -115,6 +115,8 @@ class MqttMesssageData:
 
     @staticmethod
     def send_rekey_message(message, topic, encryption_key):
+        # print(message)
+        # print(topic)
         if type(message) is dict:
             mqtt_message = dict()
             for key, value in message.items():
@@ -141,24 +143,17 @@ class MqttMesssageData:
                 signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key, message_to_bytes))
                 MqttMesssageData.publisher_GCKS.publish(topic, signed)
                 # MqttMesssageData.publisher_GCKS.publish(topic,  message_to_bytes)
-                print("sent message: " + json.dumps(mqtt_message))
-                print("sent topic: " + topic)
-                print("encryption key:")
-                print(encryption_key)
+
 
         else:
                 MqttMesssageData.initiate_mqtt_connection()
                 signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
                                                                                                         message_to_bytes))
                 #verified = crypto.digital_sign_verify(bytes.fromhex(DataSA.GCKS_Verify_Key.hex()), signed)
-                print("signed message:")
-                print(signed)
+
                 MqttMesssageData.publisher_GCKS.publish(topic, signed)
                 #MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
-                print("sent message: " + json.dumps(mqtt_message))
-                print("sent topic: " + topic)
-                print("encryption key:")
-                print(encryption_key)
+
 
     @staticmethod
     def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
@@ -205,9 +200,9 @@ class MqttMesssageData:
         MqttMesssageData.publisher_GCKS.publish(str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id),
                                                 signed)
         # MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
-        print("message and topic :")
-        print(json.dumps(data_sa_json))
-        print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
+        # print("message and topic :")
+        # print(json.dumps(data_sa_json))
+        # print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
 
 
 
@@ -230,17 +225,17 @@ class GroupController:
         tree = Node(group.group_name)
         tree_type_name = ''
         if permissions is 1:
-            tree = copy.deepcopy(group_tree_map.root_tree_publishers)
+            tree = group_tree_map.root_tree_publishers
             tree_type_name = 'pub'
         if permissions is 2:
-            tree = copy.deepcopy(group_tree_map.root_tree_subscribers)
+            tree = group_tree_map.root_tree_subscribers
             tree_type_name = 'sub'
         if permissions is 3:
             if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
-                tree = copy.deepcopy(group_tree_map.root_tree_common)
+                tree = group_tree_map.root_tree_common
                 tree_type_name = 'common'
             else:
-                tree = copy.deepcopy(group_tree_map.root_tree_pub_sub)
+                tree = group_tree_map.root_tree_pub_sub
                 tree_type_name = 'pub_sub'
 
         if result['tree_structure_change'] is False:
@@ -283,22 +278,26 @@ class GroupController:
 
         # update other trees where group keys changed
         for trees in result['update_tree']:
-            if result['update_tree'] is not None:
-                for message in trees[0]:
-                    update_msg_topic_name = group.group_id+"__" + trees[1]['tree_type'] + message['message_name']
-                    msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
-                    rekey_sa = RekeySa(3)
-                    # not here
-                    '''if type(message['changed_parent_key']) is dict:
-                        # nacl change
-                        # message_to_bytes = json.dumps(message['changed_parent_key'])
-                        message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
-                        rekey_sa.changed_keys = message_to_bytes
-                    else:
-                        message_to_bytes = message['changed_parent_key']'''
-                    rekey_sa.changed_keys = message['changed_parent_key']
-                    rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
-                    rekey_message.send_message()
+            for message in trees[0]:
+                # update_msg_topic_name = str(group.id)+"__" + trees[1]['tree_type'] + message['message_name']
+                update_msg_topic_name = str(group.id) + "__" + trees[1]['tree_type'] + message[
+                                        'message_name']
+                # print(str(group.id)+"__" + trees[1]['tree_type'] + message['message_name'])
+                # msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
+                rekey_sa = RekeySa(3)
+                # not here
+                '''if type(message['changed_parent_key']) is dict:
+                    # nacl change
+                    # message_to_bytes = json.dumps(message['changed_parent_key'])
+                    message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
+                    rekey_sa.changed_keys = message_to_bytes
+                else:
+                    message_to_bytes = message['changed_parent_key']'''
+                print(update_msg_topic_name)
+                rekey_sa.changed_keys = message['changed_parent_key']
+                MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                                                    message['encryption_key'])
+                # time.sleep(2)
 
         # now return to registration DATA SA
         data_sa = DataSA(permissions, participant.pairwise_key, "LKH")

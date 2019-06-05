@@ -84,7 +84,7 @@ print(enc_data)
 print(decrypt_secret_key(key, enc_data))"""
 
 # Generate Bob's private key, which must be kept secret
-skbob = PrivateKey.generate()
+'''skbob = PrivateKey.generate()
 
 # Bob's public key can be given to anyone wishing to send
 #   Bob an encrypted message
@@ -116,7 +116,7 @@ print(decrypt_public_key(pkbob, skalice, enc_message))
 signing_key1 = nacl.signing.SigningKey.generate()
 
 # Obtain the verify key for a given signing key
-verify_key = signing_key1.verify_key
+verify_key = signing_key1.verify_key'''
 
 # Serialize the verify key to send it to a third party
 """verify_key_hex = None
@@ -143,7 +143,7 @@ print(decrypt_secret_key(key2, enc))"""
 
 # test mac
 
-msg = b'256 BytesMessage'
+'''msg = b'256 BytesMessage'
 msg2 = 16*b'256 bytesMessage'
 
 auth_key = nacl.utils.random(size=64)
@@ -161,5 +161,5 @@ mac2 = blake2b(msg2, key=auth_key, encoder=nacl.encoding.HexEncoder)
 
 print(mac0)
 print(mac1)
-print(mac2)
+print(mac2)'''
 

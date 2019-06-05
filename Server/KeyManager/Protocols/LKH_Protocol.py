@@ -97,6 +97,10 @@ class LKH:
 
         empty_nodes = findall_by_attr(tree_root, "empty")
         if len(empty_nodes) is 0:
+
+            # change root node keys
+            if changed_root_keys is not None:
+                tree_root.tree_node.root_node_keys = changed_root_keys.copy()
             # tree structure change --
             # get all the leaf nodes and maximum node id
             leaf_nodes = tree_root.leaves
@@ -270,14 +274,18 @@ class LKH:
             for child in children:
                 if child.name is not "empty":
                     message_detail = {
-                        "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.leaf_node.node_id),
+                        "message_name": str(child.parent.tree_node.node_id) + "/" +
+                                        str(child.leaf_node.participant.participant_id)+"__changeParent__" +
+                                        str(child.parent.tree_node.node_id),
+                        # "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.leaf_node.node_id),
                         "encryption_key": child.leaf_node.participant.pairwise_key,
                         "changed_parent_key": child.parent.tree_node.root_node_keys}
                     message_details_dict_list.append(message_detail)
         else:
             for child in children:
                 message_detail = {
-                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id),
+                    "message_name": str(child.parent.tree_node.node_id) + "/" + str(child.tree_node.node_id)+
+                                    "__changeParent__" + str(child.parent.tree_node.node_id),
                     "encryption_key": child.tree_node.node_key,
                     "changed_parent_key": child.parent.tree_node.root_node_keys}
                 message_details_dict_list.append(message_detail)

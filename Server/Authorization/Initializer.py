@@ -14,7 +14,7 @@ class Initializer:
     def initialize_groups():
         topic = Topic("test123456789")
         topic2 = Topic("test12345")
-        group = Authorization.create_group("testGroup", "123", type_of_key_management_protocol=2, type_of_pub_sub_group=3)
+        group = Authorization.create_group("testGroup", "123", type_of_key_management_protocol=2, type_of_pub_sub_group=4)
         print(group)
         group.add_topic(topic)
         group.add_topic(topic2)
@@ -30,8 +30,6 @@ class Initializer:
         # set datasa global variable
         DataSA.set_gcks_signing_key(signing_key)
         DataSA.set_gcks_verify_key(verify_key_hex)
-        print("verify key hex")
-        print(verify_key_hex)
 
         while True:
             pass

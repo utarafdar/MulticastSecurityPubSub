@@ -1,0 +1,34 @@
+    @staticmethod
+    def delete_participant_lkh(group, participant, permissions):
+        result = KeyManager.add_or_delete_participant(group, participant, permissions, False, True)
+
+          for message in result['add_participant'][0]:
+              update_msg_topic_name = str(group.id)+"__" + result['add_participant'][1]['tree_type'] + message[
+                  'message_name']
+              # todo - nonce range logic
+              rekey_sa = RekeySa(3)
+              '''if type(message['changed_parent_key']) is dict:
+                  # major nacl changes
+                  # message_to_bytes = json.dumps(message['changed_parent_key'])
+                  # no bytes here encoding problem
+                  # message_to_bytes = json.dumps(message['changed_parent_key']).encode('utf-8')
+                  rekey_sa.changed_keys = message['changed_parent_key']
+              else:
+                  message_to_bytes = message['changed_parent_key']'''
+              rekey_sa.changed_keys = ['changed_parent_key']
+              MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
+
+        
+        # update other trees where group keys changed
+        for trees in result['update_tree']:
+            for message in trees[0]:
+                # update_msg_topic_name = str(group.id)+"__" + trees[1]['tree_type'] + message['message_name']
+                update_msg_topic_name = str(group.id) + "__" + trees[1]['tree_type'] + message[
+                                        'message_name']
+                # print(str(group.id)+"__" + trees[1]['tree_type'] + message['message_name'])
+                # msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
+                rekey_sa = RekeySa(3)
+                print(update_msg_topic_name)
+                rekey_sa.changed_keys = message['changed_parent_key']
+                MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                                                    message['encryption_key'])

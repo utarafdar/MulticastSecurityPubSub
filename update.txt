@@ -32,3 +32,12 @@
                 rekey_sa.changed_keys = message['changed_parent_key']
                 MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
                                                     message['encryption_key'])
+
+
+    @staticmethod
+    def delete_participant_gkmp(group, participant, permissions):
+        result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, False, True)
+
+        for message_data in result[0]:
+            MqttMesssageData.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
+                                                message_data['encryption_key'])

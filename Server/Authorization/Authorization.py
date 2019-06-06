@@ -17,6 +17,8 @@ class Authorization:
             KeyManagerGKMP.set_up_gkmp_group(group)
         if type_of_key_management_protocol is KeyManagementProtocols.LKH.value:
             KeyManager.setup_group_trees(group)
+
+        Authorization.groups.append(group)
         return group
 
     @staticmethod

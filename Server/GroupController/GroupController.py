@@ -1,6 +1,7 @@
 from Server.KeyManager.PubSubKeyManagerTreeType import KeyManager
 from Server.KeyManager.KeyManagerGKMP import KeyManagerGKMP
 from Server.CustomClasses.CustomEnums import KeyManagementProtocols, TypeOfPubSubGroupEnum, PermissionTypesEnum
+from Server.Authorization.Authorization import Authorization
 import paho.mqtt.client as mqtt
 import json
 import copy
@@ -8,6 +9,168 @@ from anytree import Node, findall_by_attr
 from nacl.encoding import HexEncoder
 import time
 import Server.CustomClasses.cryptography as crypto
+
+
+class GroupControllerMqttTopicsListner:
+    connected_mqtt = False
+    publisher_GCKS = None
+
+    @staticmethod
+    def __on_subscribe(client, userdata, mid, granted_qos):
+        print("subcription called")
+
+    @staticmethod
+    def __on_message_leave_client(client, userdata, msg):
+        # 1. split topic based on '/'
+        # 2. get group id and client id from that
+        # 3. find the participant from the group id and participant id groups
+        # 4. verify the message using participant pairwise key
+        # 5. delete participant
+        # 6. may be ====send confirmation over mqtt (encrypted with pairwise key)
+
+        group_id = msg.topic.split('/')[1]
+        client_id = msg.topic.split('/')[2]
+        permissions = None
+        participant = None
+
+        group = [x for x in Authorization.groups if x.id == group_id][0]
+
+        for key, value in group.participants_permissions.items():
+            if key.participant_id == client_id:
+                participant = key
+                permissions = value
+                break
+        # verify topic
+        dec_message = crypto.decrypt_secret_key(participant.pairwise_key, msg.payload).decode("utf-8", "ignore")
+
+        if dec_message == msg.topic:
+            print("verified topic")
+        else:
+            print("topic tampered")
+            return
+
+        if group.type_of_key_management_protocol is KeyManagementProtocols.GKMP.value:
+            GroupController.delete_participant_gkmp(group, participant, permissions)
+
+        if group.type_of_key_management_protocol is KeyManagementProtocols.LKH.value:
+            GroupController.delete_participant_lkh(group, participant, permissions)
+
+    @staticmethod
+    def initiate_mqtt_connection():
+        broker_address = "iot.eclipse.org"  # "broker.mqttdashboard.com"  # use external broker
+        GroupControllerMqttTopicsListner.publisher_GCKS = mqtt.Client("P3")  # create new instance
+        GroupControllerMqttTopicsListner.publisher_GCKS.connect(broker_address)
+        GroupControllerMqttTopicsListner.connected_mqtt = True
+        GroupControllerMqttTopicsListner.publisher_GCKS.on_subscribe = GroupControllerMqttTopicsListner.__on_subscribe
+        GroupControllerMqttTopicsListner.listen_to_group_control_topics()
+
+
+    @staticmethod
+    def listen_to_group_control_topics():
+        # subscribe to all group leave topics:
+
+        GroupControllerMqttTopicsListner.publisher_GCKS.subscribe(topic="client_leave_group/#", qos=1)
+        GroupControllerMqttTopicsListner.publisher_GCKS.message_callback_add("client_leave_group/#",
+                                    GroupControllerMqttTopicsListner.__on_message_leave_client)
+
+        # start listening to leave participant topics
+        GroupControllerMqttTopicsListner.publisher_GCKS.loop_start()
+        while True:
+            pass
+
+
+    @staticmethod
+    def send_rekey_message(message, topic, encryption_key):
+        print(message)
+        print(topic)
+        if type(message) is dict:
+            mqtt_message = dict()
+            for key, value in message.items():
+                if key is 'publisher_public_key' and value is not None:
+                    mqtt_message['publisher_public_key'] = value.encode(HexEncoder).decode()
+                if key is 'subscriber_public_key' and value is not None:
+                    mqtt_message['subscriber_public_key'] = value.encode(HexEncoder).decode()
+                if key is 'publisher_private_key' and value is not None:
+                    mqtt_message['publisher_private_key'] = value.encode(HexEncoder).decode()
+                if key is 'subscriber_private_key' and value is not None:
+                    mqtt_message['subscriber_private_key'] = value.encode(HexEncoder).decode()
+                if key is 'common_key' and value is not None:
+                    mqtt_message['common_key'] = value.hex()
+        else:
+            mqtt_message = message.hex()
+        # integrity of topic
+        message_and_topic = {"message": mqtt_message,
+                             "topic": topic}
+        # message_to_bytes = json.dumps(mqtt_message).encode('utf-8')
+        message_to_bytes = json.dumps(message_and_topic).encode('utf-8')
+
+        if GroupControllerMqttTopicsListner.connected_mqtt:
+            # digitally sign the encrypted message with GCKS signing key
+            signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key,
+                                                 crypto.encrypt_secret_key(encryption_key, message_to_bytes))
+            GroupControllerMqttTopicsListner.publisher_GCKS.publish(topic, signed)
+            # MqttMesssageData.publisher_GCKS.publish(topic,  message_to_bytes)
+
+
+        else:
+            GroupControllerMqttTopicsListner.initiate_mqtt_connection()
+            signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
+                                                                                                    message_to_bytes))
+            # verified = crypto.digital_sign_verify(bytes.fromhex(DataSA.GCKS_Verify_Key.hex()), signed)
+
+            GroupControllerMqttTopicsListner.publisher_GCKS.publish(topic, signed)
+            # MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+
+    @staticmethod
+    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
+        # set a common change structure type message topic
+        publisher_public_key = None
+        subscriber_public_key = None
+        publisher_private_key = None
+        subscriber_private_key = None
+        common_key = None
+        for key, value in ancestor_keys[0]['key'].items():
+            if key is 'publisher_public_key' and value is not None:
+                publisher_public_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_public_key' and value is not None:
+                subscriber_public_key = value.encode(HexEncoder).decode()
+            if key is 'publisher_private_key' and value is not None:
+                publisher_private_key = value.encode(HexEncoder).decode()
+            if key is 'subscriber_private_key' and value is not None:
+                subscriber_private_key = value.encode(HexEncoder).decode()
+            if key is 'common_key' and value is not None:
+                common_key = value.hex()
+
+        # topic integrity
+        keys = {
+
+            'ancestor_keys': ancestor_keys[1:],
+            'group_keys': {'publisher_public_key': publisher_public_key,
+                           'subscriber_public_key': subscriber_public_key,
+                           'publisher_private_key': publisher_private_key,
+                           'subscriber_private_key': subscriber_private_key,
+                           'common_key': common_key},
+            'rekey_topics': new_rekey_topics
+        }
+        data_sa_json = {"message": keys,
+                        "topic": str(group_id) + "__" + "changeGroupStructure" + "/" + str(participant_id)}
+
+        if not GroupControllerMqttTopicsListner.connected_mqtt:
+            GroupControllerMqttTopicsListner.initiate_mqtt_connection()
+
+        # encrypt message and digitally sign it with GCKS signing key
+        signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
+                                                                                                json.dumps(
+                                                                                                    data_sa_json).encode(
+                                                                                                    'utf-8')))
+
+        GroupControllerMqttTopicsListner.publisher_GCKS.publish(
+            str(group_id) + "__" + "changeGroupStructure" + "/" + str(participant_id),
+            signed)
+        # MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
+        # print("message and topic :")
+        # print(json.dumps(data_sa_json))
+        # print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
 
 class DataSA:
     # todo GCKS public and private keys
@@ -35,6 +198,8 @@ class DataSA:
         self.change_tree_structure_topic = None
         self.type_of_group = None
         self.rekey_gkmp_topic = None
+        self.leave_group_topic = None
+        self.leave_group_confirmation_topic = None
 
     @staticmethod
     def set_gcks_verify_key(gcks_verify_key):
@@ -89,17 +254,7 @@ class RekeySa:
         self.nonce_range = nonce_range
 
 
-class MqttMesssageData:
-    connected_mqtt = False
-    publisher_GCKS = None
-
-    @staticmethod
-    def initiate_mqtt_connection():
-        broker_address = "iot.eclipse.org"  # "broker.mqttdashboard.com"  # use external broker
-        MqttMesssageData.publisher_GCKS = mqtt.Client("P3")  # create new instance
-        MqttMesssageData.publisher_GCKS.connect(broker_address)
-        MqttMesssageData.connected_mqtt = True
-
+'''class MqttMesssageData:
 
     def __init__(self, rekey_sa, topic, encryption_key):
         self.rekey_sa = copy.copy(rekey_sa)
@@ -139,20 +294,20 @@ class MqttMesssageData:
         #message_to_bytes = json.dumps(mqtt_message).encode('utf-8')
         message_to_bytes = json.dumps(message_and_topic).encode('utf-8')
 
-        if MqttMesssageData.connected_mqtt:
+        if GroupControllerMqttTopicsListner.connected_mqtt:
                 # digitally sign the encrypted message with GCKS signing key
                 signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key, message_to_bytes))
-                MqttMesssageData.publisher_GCKS.publish(topic, signed)
+                GroupControllerMqttTopicsListner.publisher_GCKS.publish(topic, signed)
                 # MqttMesssageData.publisher_GCKS.publish(topic,  message_to_bytes)
 
 
         else:
-                MqttMesssageData.initiate_mqtt_connection()
+                GroupControllerMqttTopicsListner.initiate_mqtt_connection()
                 signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
                                                                                                         message_to_bytes))
                 #verified = crypto.digital_sign_verify(bytes.fromhex(DataSA.GCKS_Verify_Key.hex()), signed)
 
-                MqttMesssageData.publisher_GCKS.publish(topic, signed)
+                GroupControllerMqttTopicsListner.publisher_GCKS.publish(topic, signed)
                 #MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
 
 
@@ -191,19 +346,19 @@ class MqttMesssageData:
                         "topic": str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id)}
 
 
-        if not MqttMesssageData.connected_mqtt:
-            MqttMesssageData.initiate_mqtt_connection()
+        if not GroupControllerMqttTopicsListner.connected_mqtt:
+            GroupControllerMqttTopicsListner.initiate_mqtt_connection()
 
         # encrypt message and digitally sign it with GCKS signing key
         signed = crypto.digital_sign_message(DataSA.GCKS_Signing_Key, crypto.encrypt_secret_key(encryption_key,
                                                                                                 json.dumps(data_sa_json).encode('utf-8')))
 
-        MqttMesssageData.publisher_GCKS.publish(str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id),
+        GroupControllerMqttTopicsListner.publisher_GCKS.publish(str(group_id) +"__" +"changeGroupStructure" + "/" + str(participant_id),
                                                 signed)
         # MqttMesssageData.publisher_GCKS.publish("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id), json.dumps(data_sa_json))
         # print("message and topic :")
         # print(json.dumps(data_sa_json))
-        # print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))
+        # print("changeGroupStructure__" + str(group_id) + "__/" + str(participant_id))'''
 
 
 
@@ -254,7 +409,7 @@ class GroupController:
                 else:
                     message_to_bytes = message['changed_parent_key']'''
                 rekey_sa.changed_keys = ['changed_parent_key']
-                MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
+                GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
                 # time.sleep(2)
                 # rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
                 # rekey_message.send_message()
@@ -273,7 +428,7 @@ class GroupController:
                                                                                                     group,
                                                                                                     tree_type_name,
                                                                                                     leaf.leaf_node.participant)
-                    MqttMesssageData.change_structure_message(ancestor_keys, topic_to_sub_enc_keys,
+                    GroupControllerMqttTopicsListner.change_structure_message(ancestor_keys, topic_to_sub_enc_keys,
                                                               leaf.leaf_node.participant.pairwise_key,
                                                               leaf.leaf_node.participant.participant_id, group.id)
 
@@ -288,7 +443,7 @@ class GroupController:
                 rekey_sa = RekeySa(3)
                 print(update_msg_topic_name)
                 rekey_sa.changed_keys = message['changed_parent_key']
-                MqttMesssageData.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
                                                     message['encryption_key'])
                 # time.sleep(2)
 
@@ -317,6 +472,8 @@ class GroupController:
         data_sa.set_group_id(group.id)
         data_sa.set_type_of_group(group.type_of_pub_sub_group)
         data_sa.set_change_tree_structure_topic(group.id, participant.participant_id)
+        data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
+        data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/"+ group.id + "/" + participant.participant_id
         return data_sa
 
     @staticmethod
@@ -324,7 +481,7 @@ class GroupController:
         result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, True, False)
 
         for message_data in result[0]:
-            MqttMesssageData.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
+            GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
                                                 message_data['encryption_key'])
         participant_group_keys = result[1]
         # now return to registration DATA SA
@@ -348,16 +505,45 @@ class GroupController:
         data_sa.set_group_topics(group.topics)
         data_sa.set_group_id(group.id)
         data_sa.set_type_of_group(group.type_of_pub_sub_group)
+        data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
+        data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/" + group.id + "/" + participant.participant_id
         return data_sa
 
 
     @staticmethod
-    def delete_participant_lkh():
-        pass
+    def delete_participant_lkh(group, participant, permissions):
+        result = KeyManager.add_or_delete_participant(group, participant, permissions, False, True)
+
+        for message in result['delete_participant'][0]:
+            update_msg_topic_name = str(group.id) + "__" + result['delete_participant'][1]['tree_type'] + message[
+                'message_name']
+            # todo - nonce range logic
+            rekey_sa = RekeySa(3)
+
+            rekey_sa.changed_keys = ['changed_parent_key']
+            GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                                                message['encryption_key'])
+        for trees in result['update_tree']:
+            for message in trees[0]:
+                # update_msg_topic_name = str(group.id)+"__" + trees[1]['tree_type'] + message['message_name']
+                update_msg_topic_name = str(group.id) + "__" + trees[1]['tree_type'] + message[
+                                        'message_name']
+                # print(str(group.id)+"__" + trees[1]['tree_type'] + message['message_name'])
+                # msg_updated_key = str(message['changed_parent_key'])+" "+str(message['encryption_key'])
+                rekey_sa = RekeySa(3)
+                print(update_msg_topic_name)
+                rekey_sa.changed_keys = message['changed_parent_key']
+                GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                                                    message['encryption_key'])
+
 
     @staticmethod
-    def delete_participant_gkmp():
-        pass
+    def delete_participant_gkmp(group, participant, permissions):
+        result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, False, True)
+
+        for message_data in result[0]:
+            GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
+                                                message_data['encryption_key'])
 
     @staticmethod
     def rekey_lkh():

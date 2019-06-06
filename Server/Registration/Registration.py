@@ -57,6 +57,9 @@ def threaded(conn):
         # serialize it
         data = __convert_data_sa_to_json(data_sa, group.type_of_key_management_protocol)
         # todo -- store the participant id and permissions --
+        print("group participants")
+        print(group.participants_permissions[participant])
+
         conn.sendall(json.dumps(data).encode())
         #conn.sendall(pickle.dumps(data_sa))
         # print_lock.release()
@@ -67,6 +70,10 @@ def threaded(conn):
 def initializer():
     from Server.Authorization.Initializer import Initializer
     Initializer.initialize_groups()
+
+def initialize_group_controller():
+    from Server.GroupController.GroupController import GroupControllerMqttTopicsListner
+    GroupControllerMqttTopicsListner.initiate_mqtt_connection()
 
 
 def Main():
@@ -85,6 +92,8 @@ def Main():
     print("socket is listening")
     # initialize
     start_new_thread(initializer, ())
+    start_new_thread(initialize_group_controller, ())
+
     # a forever loop until client wants to exit
     while True:
         # establish connection with client
@@ -139,7 +148,9 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
                         'type_of_group': data_sa.type_of_group,
                         'type_of_key_management': data_sa.key_management_type,
                         'change_tree_structure_topic': data_sa.change_tree_structure_topic,
-                        'participant_id': data_sa.participant_id
+                        'participant_id': data_sa.participant_id,
+                        'leave_group_request_topic': data_sa.leave_group_topic,
+                        'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic
         }
 
     if key_management_prototcol is KeyManagementProtocols.GKMP.value:
@@ -170,7 +181,9 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
             'group_id': data_sa.group_id,
             'type_of_group': data_sa.type_of_group,
             'type_of_key_management': data_sa.key_management_type,
-            'participant_id': data_sa.participant_id
+            'participant_id': data_sa.participant_id,
+            'leave_group_request_topic': data_sa.leave_group_topic,
+            'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic
         }
 
     return data_sa_json

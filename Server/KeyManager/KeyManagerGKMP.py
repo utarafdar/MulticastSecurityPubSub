@@ -91,10 +91,18 @@ class KeyManagerGKMP:
     def add_or_delete_participant(group, participant, participant_permission, add_participant=False,
                                   delete_participant=False):
         messages = list()
+
         if add_participant is False and delete_participant is False:
             return "error"
 
         group_gkmp_map = [x for x in KeyManagerGKMP.group_gkmp_mapping_list if x.group.id == group.id][0]
+
+        # add or remove participant from the group
+        if add_participant is True:
+            group_gkmp_map.group.add_participant(participant, participant_permission)
+
+        if delete_participant is True:
+            group_gkmp_map.group.delete_participant(participant)
 
         if group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
 

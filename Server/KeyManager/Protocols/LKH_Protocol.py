@@ -227,12 +227,19 @@ class LKH:
         siblings = participant_to_be_removed.siblings
         for sibling in siblings:
             if sibling.leaf_node.participant is not None:
+                # test changes
+                if sibling.parent.is_root:
+                    changed_parent_key = sibling.parent.tree_node.root_node_keys
+                else:
+                    changed_parent_key = sibling.parent.tree_node.node_key
+                #test chnages end
                 message_detail = {
                     # "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(sibling.leaf_node.node_id),
                     "message_name": str(sibling.parent.tree_node.node_id) + "/" + str(
                         sibling.leaf_node.participant.participant_id) + "__changeParent__" + str(sibling.parent.tree_node.node_id),
                     "encryption_key": sibling.leaf_node.participant.pairwise_key,
-                    "changed_parent_key": sibling.parent.tree_node.node_key}
+                    "changed_parent_key": changed_parent_key}
+                    # "changed_parent_key": sibling.parent.tree_node.node_key}
                 message_details_dict_list.append(message_detail)
         # construct messages for ancestors and their siblings
         for ancestor in range(len(ancestor_list) - 2, -1, -1):

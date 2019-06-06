@@ -692,7 +692,7 @@ class KeyManager:
         update_tree_data = list()
 
         # print(trees_data_to_be_updated)
-
+        tree_structure_change = False
         for trees_data in trees_data_to_be_updated:
             if trees_data['add_participant'] is True:
                 #todo check if duplicate
@@ -709,6 +709,10 @@ class KeyManager:
                     tree_type = 'pub_sub'
                 if trees_data['tree'] == group_tree_map.root_tree_common:
                     tree_type = 'common'
+
+                # check if tree structure changed
+                if message[3] is True:
+                    tree_structure_change = True
 
                 add_participant_data = (message[2], {'tree_type': tree_type})
 
@@ -743,9 +747,11 @@ class KeyManager:
                     tree_type = 'common'
 
                 update_tree_data.append((message2[1], {'tree_type': tree_type}))
-        tree_structure_change = False
+
+        '''tree_structure_change = False
+        
         if message[3] is True:
-            tree_structure_change = True
+            tree_structure_change = True'''
 
         return_message = {'add_participant': add_participant_data,
                           'delete_participant': delete_participant_data,

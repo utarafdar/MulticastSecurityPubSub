@@ -9,12 +9,12 @@ from Server.CustomClasses.CustomEnums import KeyManagementProtocols
 # import thread module
 from _thread import *
 import threading
-import pickle
 import nacl.utils
 import nacl.secret
 import json
 import uuid
-import jsonpickle
+import os
+import re
 from nacl.encoding import HexEncoder
 
 print_lock = threading.Lock()
@@ -67,18 +67,28 @@ def threaded(conn):
         break
 
     # connection closed
+
+
 def initializer():
     from Server.Authorization.Initializer import Initializer
     Initializer.initialize_groups()
+
 
 def initialize_group_controller():
     from Server.GroupController.GroupController import GroupControllerMqttTopicsListner
     GroupControllerMqttTopicsListner.initiate_mqtt_connection()
 
 
-def Main():
-    host = '127.0.0.1'
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
 
+
+def Main():
+    # host = '172.16.1.101'
+    # host = socket.gethostbyname(socket.getfqdn())
+    host = get_ip_address()
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
@@ -150,7 +160,8 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
                         'change_tree_structure_topic': data_sa.change_tree_structure_topic,
                         'participant_id': data_sa.participant_id,
                         'leave_group_request_topic': data_sa.leave_group_topic,
-                        'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic
+                        'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic,
+                        'request_group_keys_change_topic': data_sa.request_rekey_topic
         }
 
     if key_management_prototcol is KeyManagementProtocols.GKMP.value:
@@ -183,7 +194,8 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
             'type_of_key_management': data_sa.key_management_type,
             'participant_id': data_sa.participant_id,
             'leave_group_request_topic': data_sa.leave_group_topic,
-            'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic
+            'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic,
+            'request_group_keys_change_topic': data_sa.request_rekey_topic
         }
 
     return data_sa_json

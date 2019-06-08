@@ -390,6 +390,160 @@ class KeyManager:
         # check if pub and sub trees are not none and add participants to the trees accordingly
 
     @staticmethod
+    def update_group_keys(group):
+        update_tree_data = list()
+        group_tree_map = [x for x in KeyManager.group_tree_mapping_list if x.group.id == group.id][0]
+
+        if group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            # set the keys to be changed here
+            common_keys_reset = {'common_key': generate_key()}
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_common,
+                                                     changed_root_keys=common_keys_reset)
+
+            update_tree_data.append((messages[1], {'tree_type': 'common'}))
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+            # todo check .value here
+            common_keys_reset = generate_key()
+            # when not all are allowed to publish, public and private key are signing and verifying key
+            publisher_private_key_reset = nacl.signing.SigningKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.verify_key
+
+            subscriber_keys_reset = {'common_key': common_keys_reset,
+                                     'publisher_public_key': publisher_public_key_reset}
+
+            pub_sub_keys_reset = {'common_key': common_keys_reset,
+                                  'publisher_public_key': publisher_public_key_reset,
+                                  'publisher_private_key': publisher_private_key_reset}
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_pub_sub,
+                                                 changed_root_keys=pub_sub_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub_sub'}))
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_subscribers,
+                                                 changed_root_keys=subscriber_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'sub'}))
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
+            # common key symmetric
+            common_keys_reset = generate_key()
+
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
+
+            pub_sub_keys_reset = {'common_key': common_keys_reset,
+                                  'subscriber_public_key': subscriber_public_key_reset,
+                                  'subscriber_private_key': subscriber_private_key_reset}
+
+            publisher_keys_reset = {'subscriber_public_key': subscriber_public_key_reset,
+                                    'common_key': common_keys_reset}
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_pub_sub,
+                                                 changed_root_keys=pub_sub_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub_sub'}))
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_publishers,
+                                                 changed_root_keys=publisher_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub'}))
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
+
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
+
+            subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                     'subscriber_public_key': subscriber_public_key_reset,
+                                     'subscriber_private_key': subscriber_private_key_reset}
+
+            pub_sub_keys_reset = {'subscriber_public_key': subscriber_public_key_reset,
+                                  'subscriber_private_key': subscriber_private_key_reset,
+                                  'publisher_public_key': publisher_public_key_reset,
+                                  'publisher_private_key': publisher_private_key_reset}
+
+            publisher_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                    'publisher_private_key': publisher_private_key_reset,
+                                    'subscriber_public_key': subscriber_public_key_reset}
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_pub_sub,
+                                                 changed_root_keys=pub_sub_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub_sub'}))
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_publishers,
+                                                 changed_root_keys=publisher_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub'}))
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_subscribers,
+                                                 changed_root_keys=subscriber_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'sub'}))
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
+
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
+
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
+
+            subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                     'subscriber_public_key': subscriber_public_key_reset,
+                                     'subscriber_private_key': subscriber_private_key_reset}
+
+            publisher_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                    'publisher_private_key': publisher_private_key_reset,
+                                    'subscriber_public_key': subscriber_public_key_reset}
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_publishers,
+                                                 changed_root_keys=publisher_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub'}))
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_subscribers,
+                                                 changed_root_keys=subscriber_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'sub'}))
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+
+            common_keys_reset = generate_key()
+            subscriber_private_key_reset = PrivateKey.generate()
+            subscriber_public_key_reset = subscriber_private_key_reset.public_key
+
+            publisher_keys_reset = {'common_key': common_keys_reset,
+                                    'subscriber_public_key': subscriber_public_key_reset}
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_publishers,
+                                                 changed_root_keys=publisher_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'pub'}))
+
+            edge_case_subscriber_keys = {'common_key': common_keys_reset,
+                                         'publisher_public_key': subscriber_public_key_reset,
+                                         'publisher_private_key': subscriber_private_key_reset
+                                        }
+            group_tree_map.edge_case_one_publisher_keys = edge_case_subscriber_keys.copy()
+
+        elif group_tree_map.group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+
+            common_keys_reset = generate_key()
+            publisher_private_key_reset = PrivateKey.generate()
+            publisher_public_key_reset = publisher_private_key_reset.public_key
+
+            subscriber_keys_reset = {'publisher_public_key': publisher_public_key_reset,
+                                     'common_key': common_keys_reset}
+
+            # setting keys for edge case // also need to send message encrypted with pairwise key
+            edge_case_publisher_keys = {'common_key': common_keys_reset,
+                                        'publisher_public_key': publisher_public_key_reset,
+                                        'publisher_private_key': publisher_private_key_reset}
+            group_tree_map.edge_case_one_publisher_keys = edge_case_publisher_keys.copy()
+
+            messages = LKH.update_tree_root_keys(group_tree_map.root_tree_subscribers,
+                                                 changed_root_keys=subscriber_keys_reset)
+            update_tree_data.append((messages[1], {'tree_type': 'sub'}))
+
+        return update_tree_data
+
+    @staticmethod
     def add_or_delete_participant(group, participant, participant_permission, add_participant=False,
                                   delete_participant=False):
 

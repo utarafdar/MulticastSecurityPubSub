@@ -88,6 +88,131 @@ class KeyManagerGKMP:
         KeyManagerGKMP.group_gkmp_mapping_list.append(group_gkmp_map)
 
     @staticmethod
+    def update_group_keys(group):
+        messages = list()
+        group_gkmp_map = [x for x in KeyManagerGKMP.group_gkmp_mapping_list if x.group.id == group.id][0]
+
+        if group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+
+            group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
+                                         'participant_list': group_gkmp_map.publishers_and_subscribers}
+
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
+
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB.value:
+            # publishers - commonkey and sub public key
+
+            group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
+
+            asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.subscriber_private_key = asymmetric_keys[0]
+            group_gkmp_map.subscriber_public_key = asymmetric_keys[1]
+
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
+                                         'subscriber_public_key' : group_gkmp_map.subscriber_public_key,
+                                         'participant_list': group_gkmp_map.publishers}
+
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
+            # for publishers and subscribers
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
+                                         'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                         'participant_list': group_gkmp_map.publishers_and_subscribers}
+
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
+
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_SUB.value:
+
+            # NEED TO GENERATE SIGNING KEYS HERE
+            group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
+            group_gkmp_map.publisher_private_key = nacl.signing.SigningKey.generate()
+            group_gkmp_map.publisher_public_key = group_gkmp_map.publisher_private_key.verify_key
+
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'participant_list': group_gkmp_map.subscribers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
+            # for publishers and subscribers
+            changed_keys_participants = {'common_key': group_gkmp_map.common_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                         'participant_list': group_gkmp_map.publishers_and_subscribers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
+
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUB_SOME_SUB.value:
+
+            # publishers 3 keys, subscribers 3 keys
+            asymmetric_keys_sub = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.subscriber_private_key = asymmetric_keys_sub[0]
+            group_gkmp_map.subscriber_public_key = asymmetric_keys_sub[1]
+
+            asymmetric_pub = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.publisher_private_key = asymmetric_pub[0]
+            group_gkmp_map.publisher_public_key = asymmetric_pub[1]
+
+            changed_keys_participants = {'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'participant_list': group_gkmp_map.publishers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
+            # for publishers and subscribers
+            changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'participant_list': group_gkmp_map.subscribers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
+
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+
+            asymmetric_keys_sub = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.subscriber_private_key = asymmetric_keys_sub[0]
+            group_gkmp_map.subscriber_public_key = asymmetric_keys_sub[1]
+
+            asymmetric_pub = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.publisher_private_key = asymmetric_pub[0]
+            group_gkmp_map.publisher_public_key = asymmetric_pub[1]
+
+            changed_keys_participants = {'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'participant_list': group_gkmp_map.publishers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub"))
+
+            changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'participant_list': group_gkmp_map.subscribers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "sub"))
+
+            changed_keys_participants = {'subscriber_public_key': group_gkmp_map.subscriber_public_key,
+                                         'subscriber_private_key': group_gkmp_map.subscriber_private_key,
+                                         'publisher_public_key': group_gkmp_map.publisher_public_key,
+                                         'publisher_private_key': group_gkmp_map.publisher_private_key,
+                                         'participant_list': group_gkmp_map.publishers_and_subscribers}
+            messages.extend(KeyManagerGKMP.__send_messages(changed_keys_participants, group.id, "pub_sub"))
+
+        # handle edge cases
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_PUB_1_SUB.value:
+            group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
+
+            asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.subscriber_private_key = asymmetric_keys[0]
+            group_gkmp_map.subscriber_public_key = asymmetric_keys[1]
+
+        elif group.type_of_pub_sub_group == TypeOfPubSubGroupEnum.MANY_SUB_1_PUB.value:
+            group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()
+
+            asymmetric_keys = KeyManagerGKMP.__generate_asymmetric_keys()
+            group_gkmp_map.publisher_private_key = asymmetric_keys[0]
+            group_gkmp_map.publisher_public_key = asymmetric_keys[1]
+
+        else:
+            pass  # return error
+        return messages
+
+
+    @staticmethod
     def add_or_delete_participant(group, participant, participant_permission, add_participant=False,
                                   delete_participant=False):
         messages = list()

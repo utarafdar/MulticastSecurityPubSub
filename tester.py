@@ -170,3 +170,16 @@ print()
 #print(RenderTree(test_lkh.tree_from_json(json_res)[0]))
 #print(test_lkh.tree_from_json(json_res)[1])
 # print(resl[""])
+
+dicct = {'a':1,
+         'b':2}
+dict1 = {'ab':dicct,
+         'ab1':dicct}
+dict1['ab2'] = dicct
+print(dict1['ab']['a'])
+
+print(list(dict1.keys())[-1])
+
+dicti = dict()
+dicti['1'] = 2
+print(dicti)

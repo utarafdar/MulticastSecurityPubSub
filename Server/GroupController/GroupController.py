@@ -9,6 +9,7 @@ from anytree import Node, findall_by_attr
 from nacl.encoding import HexEncoder
 import time
 import Server.CustomClasses.cryptography as crypto
+import random
 
 
 class GroupControllerMqttTopicsListner:
@@ -92,9 +93,10 @@ class GroupControllerMqttTopicsListner:
 
     @staticmethod
     def initiate_mqtt_connection():
-        broker_address = "iot.eclipse.org"  # "broker.mqttdashboard.com"  # use external broker
+        broker_address = "iot.eclipse.org"  # "linksmart-dev.fit.fraunhofer.de"## "broker.mqttdashboard.com"  # use external broker
         GroupControllerMqttTopicsListner.publisher_GCKS = mqtt.Client("P3")  # create new instance
         GroupControllerMqttTopicsListner.publisher_GCKS.connect(broker_address)
+        print("done")
         GroupControllerMqttTopicsListner.connected_mqtt = True
         GroupControllerMqttTopicsListner.publisher_GCKS.on_subscribe = GroupControllerMqttTopicsListner.__on_subscribe
         GroupControllerMqttTopicsListner.listen_to_group_control_topics()
@@ -121,11 +123,12 @@ class GroupControllerMqttTopicsListner:
 
 
     @staticmethod
-    def send_rekey_message(message, topic, encryption_key):
+    def send_rekey_message(message, topic, encryption_key, random_sequence):
         print(message)
         print(topic)
         if type(message) is dict:
             mqtt_message = dict()
+            mqtt_message['key_sequence_number'] = random_sequence
             for key, value in message.items():
                 if key is 'publisher_public_key' and value is not None:
                     mqtt_message['publisher_public_key'] = value.encode(HexEncoder).decode()
@@ -161,9 +164,10 @@ class GroupControllerMqttTopicsListner:
 
             GroupControllerMqttTopicsListner.publisher_GCKS.publish(topic, signed)
             # MqttMesssageData.publisher_GCKS.publish(topic, message_to_bytes)
+        return random_sequence
 
     @staticmethod
-    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id):
+    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id, random_sequence):
         # set a common change structure type message topic
         publisher_public_key = None
         subscriber_public_key = None
@@ -190,7 +194,8 @@ class GroupControllerMqttTopicsListner:
                            'subscriber_public_key': subscriber_public_key,
                            'publisher_private_key': publisher_private_key,
                            'subscriber_private_key': subscriber_private_key,
-                           'common_key': common_key},
+                           'common_key': common_key,
+                           'key_sequence_number': random_sequence},
             'rekey_topics': new_rekey_topics
         }
         data_sa_json = {"message": keys,
@@ -241,6 +246,7 @@ class DataSA:
         self.rekey_gkmp_topic = None
         self.leave_group_topic = None
         self.leave_group_confirmation_topic = None
+        self.key_sequence_number = None
 
     @staticmethod
     def set_gcks_verify_key(gcks_verify_key):
@@ -307,15 +313,19 @@ class GroupController:
 
     @staticmethod
     def change_group_keys_gkmp(group):
+        group.current_key_sequence_number = random.randint(1, 100000)
+
         result = KeyManagerGKMP.update_group_keys(group)
 
         for message_data in result:
             GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'],
                                                                 message_data['message_name'],
-                                                                message_data['encryption_key'])
+                                                                message_data['encryption_key'],
+                                                                group.current_key_sequence_number)
 
     @staticmethod
     def change_group_keys_lkh(group):
+        group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManager.update_group_keys(group)
         for tree in result:
             for message in tree[0]:
@@ -325,10 +335,11 @@ class GroupController:
                 print(update_msg_topic_name)
                 rekey_sa.changed_keys = message['changed_parent_key']
                 GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
-                                                    message['encryption_key'])
+                                                    message['encryption_key'], group.current_key_sequence_number)
 
     @staticmethod
     def add_participant_lkh(group, participant, permissions):
+        group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManager.add_or_delete_participant(group, participant, permissions, True, False)
         # check again
         # to get the exact tree
@@ -364,7 +375,8 @@ class GroupController:
                 else:
                     message_to_bytes = message['changed_parent_key']'''
                 rekey_sa.changed_keys = ['changed_parent_key']
-                GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name, message['encryption_key'])
+                GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
+                                                                    message['encryption_key'], group.current_key_sequence_number)
                 # time.sleep(2)
                 # rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
                 # rekey_message.send_message()
@@ -385,7 +397,8 @@ class GroupController:
                                                                                                     leaf.leaf_node.participant)
                     GroupControllerMqttTopicsListner.change_structure_message(ancestor_keys, topic_to_sub_enc_keys,
                                                               leaf.leaf_node.participant.pairwise_key,
-                                                              leaf.leaf_node.participant.participant_id, group.id)
+                                                              leaf.leaf_node.participant.participant_id, group.id,
+                                                              group.current_key_sequence_number)
 
         # update other trees where group keys changed
         for trees in result['update_tree']:
@@ -399,7 +412,7 @@ class GroupController:
                 print(update_msg_topic_name)
                 rekey_sa.changed_keys = message['changed_parent_key']
                 GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
-                                                    message['encryption_key'])
+                                                    message['encryption_key'], group.current_key_sequence_number)
                 # time.sleep(2)
 
         # now return to registration DATA SA
@@ -429,15 +442,17 @@ class GroupController:
         data_sa.set_change_tree_structure_topic(group.id, participant.participant_id)
         data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
         data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/"+ group.id + "/" + participant.participant_id
+        data_sa.key_sequence_number = group.current_key_sequence_number
         return data_sa
 
     @staticmethod
     def add_participant_gkmp(group, participant, permissions):
+        group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, True, False)
 
         for message_data in result[0]:
             GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
-                                                message_data['encryption_key'])
+                                                message_data['encryption_key'], group.current_key_sequence_number)
         participant_group_keys = result[1]
         # now return to registration DATA SA
         data_sa = DataSA(permissions, participant.pairwise_key, "GKMP")
@@ -462,11 +477,13 @@ class GroupController:
         data_sa.set_type_of_group(group.type_of_pub_sub_group)
         data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
         data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/" + group.id + "/" + participant.participant_id
+        data_sa.key_sequence_number = group.current_key_sequence_number
         return data_sa
 
 
     @staticmethod
     def delete_participant_lkh(group, participant, permissions):
+        group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManager.add_or_delete_participant(group, participant, permissions, False, True)
 
         for message in result['delete_participant'][0]:
@@ -477,7 +494,7 @@ class GroupController:
 
             rekey_sa.changed_keys = ['changed_parent_key']
             GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
-                                                message['encryption_key'])
+                                                message['encryption_key'], group.current_key_sequence_number)
         for trees in result['update_tree']:
             for message in trees[0]:
                 # update_msg_topic_name = str(group.id)+"__" + trees[1]['tree_type'] + message['message_name']
@@ -489,16 +506,17 @@ class GroupController:
                 print(update_msg_topic_name)
                 rekey_sa.changed_keys = message['changed_parent_key']
                 GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
-                                                    message['encryption_key'])
+                                                    message['encryption_key'], group.current_key_sequence_number)
 
 
     @staticmethod
     def delete_participant_gkmp(group, participant, permissions):
+        group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, False, True)
 
         for message_data in result[0]:
             GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
-                                                message_data['encryption_key'])
+                                                message_data['encryption_key'], group.current_key_sequence_number)
 
     @staticmethod
     def rekey_lkh():

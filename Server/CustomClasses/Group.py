@@ -11,6 +11,7 @@ class Group:
                  type_of_key_management_protocol=KeyManagementProtocols.GKMP.value):
         self.group_name = group_name
         self.type_of_pub_sub_group = type_of_pub_sub_group
+        self.current_key_sequence_number = None
         if group_id is None:
             self.id = uuid.uuid4()
         else:

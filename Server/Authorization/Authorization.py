@@ -27,6 +27,8 @@ class Authorization:
         permission = random.randint(1, 3)
         if permission == 2:
             permission = permission-1
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.SOME_PUBSUB_SOME_PUB_SOME_SUB.value:
+            permission = 3
         return permission, participant, group
 
     @staticmethod

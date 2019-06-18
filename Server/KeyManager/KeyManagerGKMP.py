@@ -234,7 +234,7 @@ class KeyManagerGKMP:
             added_participant_keys = None
 
             if delete_participant is True:
-                deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if x.particpaint_id == participant.participant_id][0]
+                deleted_participant = [x for x in group_gkmp_map.publishers_and_subscribers if x.participant_id == participant.participant_id][0]
                 group_gkmp_map.publishers_and_subscribers.remove(deleted_participant)
 
             group_gkmp_map.common_key = KeyManagerGKMP.__generate_symmetric_key()

@@ -162,7 +162,9 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
                         'participant_id': data_sa.participant_id,
                         'leave_group_request_topic': data_sa.leave_group_topic,
                         'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic,
-                        'request_group_keys_change_topic': data_sa.request_rekey_topic
+                        'request_group_keys_change_topic': data_sa.request_rekey_topic,
+                        'nonce_prefix_size': data_sa.nonce_prefix_size,
+                        'nonce_prefix_value': data_sa.nonce_prefix_value
         }
 
     if key_management_prototcol is KeyManagementProtocols.GKMP.value:
@@ -197,7 +199,9 @@ def __convert_data_sa_to_json(data_sa, key_management_prototcol):
             'participant_id': data_sa.participant_id,
             'leave_group_request_topic': data_sa.leave_group_topic,
             'leave_group_confirmation_subscribe_topic': data_sa.leave_group_confirmation_topic,
-            'request_group_keys_change_topic': data_sa.request_rekey_topic
+            'request_group_keys_change_topic': data_sa.request_rekey_topic,
+            'nonce_prefix_size': data_sa.nonce_prefix_size,
+            'nonce_prefix_value': data_sa.nonce_prefix_value
         }
 
     return data_sa_json

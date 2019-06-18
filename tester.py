@@ -9,6 +9,7 @@ from CustomEnums import TypeOfPubSubGroupEnum, PermissionTypesEnum
 from PubSubKeyManagerTreeType import KeyManager
 test_lkh = LKH()
 from KeyManagerGKMP import KeyManagerGKMP
+import math
 
 #test_tree = test_lkh.setup_tree_no_participants(3, 2, "test")[0]
 #print(findall_by_attr(test_tree, "3")[0].tree_node.node_key)
@@ -183,3 +184,38 @@ print(list(dict1.keys())[-1])
 dicti = dict()
 dicti['1'] = 2
 print(dicti)
+
+x =0
+
+if x == 1 or x==0:
+    print("pass")
+else:
+    print("fail")
+
+node = Node("1", value = "this is it")
+node2 = Node("2", parent=node)
+node3 = Node("3", parent=node2)
+node4 = Node("4", parent=node3)
+node5 = Node("4", parent=node3)
+
+print(len(node.leaves))
+depth = math.ceil(math.log2(2))
+print(depth)
+
+test = list()
+test.append(10)
+value = test[0]
+del test[0]
+print(value)
+print(len(test))
+
+dict1 = dict()
+dict1['1'] = 2
+dict1['2'] = 3
+dict1['3'] = 4
+
+print(len(dict1))
+print(list(dict1.keys())[0])
+key = list(dict1.keys())[0]
+del dict1[key]
+print(dict1)

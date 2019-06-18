@@ -25,6 +25,7 @@ class Group:
         # topics are part of the group
         self.topics = list()
         self.participants_permissions = dict()
+        self.nonce_free_prefix_values = list()
         # a way to set no of children and depth for individual groups
         # remove these after resolving
         """ self.no_of_children_common_tree = None

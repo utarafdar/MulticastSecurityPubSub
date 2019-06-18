@@ -59,6 +59,35 @@ def digital_sign_verify(verify_key_hex, signed_message):
     return verify_key.verify(signed_message)
 
 
+def add_binary_nums(x, y):
+    max_len = max(len(x), len(y))
+
+    x = x.zfill(max_len)
+    y = y.zfill(max_len)
+
+    # initialize the result
+    result = ''
+
+    # initialize the carry
+    carry = 0
+
+    # Traverse the string
+    for i in range(max_len - 1, -1, -1):
+        r = carry
+        r += 1 if x[i] == '1' else 0
+        r += 1 if y[i] == '1' else 0
+        result = ('1' if r % 2 == 1 else '0') + result
+        carry = 0 if r < 2 else 1  # Compute the carry.
+
+    if carry != 0: result = '1' + result
+
+    return result.zfill(max_len)
+
+
+def bitstring_to_bytes(s):
+    return int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')
+
+
 #key1 = os.urandom(16)
 """enc = encrypt_aes(key1, "this is  message to be encrypted")
 print(enc)
@@ -163,3 +192,60 @@ listo.extend(list1)
 list2.extend(list1)
 print(listo)
 print(list2)
+
+nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+print(nonce)
+print(len(nonce))
+print(type(nonce))
+bitlist = []
+for x in (0, 20):
+    bitlist.append(str(0))
+nonce_number = ''.join(bitlist)
+nonce_number = 23 * b'\x00'
+nonce_number = nonce_number + b'\x01'
+nonce_prefix = 3
+hex_string = '0x{:02x}'.format(nonce_prefix)
+# print(bytes.fromhex(hex_string))
+print(nonce_number)
+
+#print(add_binary_nums('000000000000000000001001', '1'))
+#rs = add_binary_nums(23*8*'0'+'11111110', '1')
+rs = add_binary_nums(23*8*'0'+4*'0'+bin(10)[2:], '1')
+
+print(rs)
+print(type(rs))
+print(len(rs))
+print(bitstring_to_bytes(rs))
+print(type(bitstring_to_bytes(rs)))
+print(len(bitstring_to_bytes(rs)))
+
+key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+box = nacl.secret.SecretBox(key)
+
+
+# This is our message to send, it must be a bytestring as SecretBox will
+#   treat it as just a binary blob of data.
+message = b"The president will be exiting through the lower levels"
+print(type(message))
+
+
+nonce_prefix = 4
+nonce_number = 5
+
+nonce_prefix_value = (nonce_prefix-len(bin(nonce_number)[2:])) * '0' + bin(nonce_number)[2:]
+print("here")
+print(nonce_prefix_value)
+
+nonce_sequence = ((24*8) - nonce_prefix ) * '0'
+print(nonce_sequence)
+incremented_seq = add_binary_nums(nonce_sequence, '1')
+incremented_seq = add_binary_nums(incremented_seq, '1')
+print(incremented_seq)
+final_nonce = bitstring_to_bytes(incremented_seq + nonce_prefix_value)
+print(final_nonce)
+encrypted = box.encrypt(message, final_nonce)
+#encrypted = box.encrypt(message, bitstring_to_bytes(rs))
+print (box.decrypt(encrypted))
+test = '00000000'
+
+print(len(bin(10)[2:]))

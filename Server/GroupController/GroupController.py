@@ -10,6 +10,7 @@ from nacl.encoding import HexEncoder
 import time
 import Server.CustomClasses.cryptography as crypto
 import random
+import math
 
 
 class GroupControllerMqttTopicsListner:
@@ -93,7 +94,7 @@ class GroupControllerMqttTopicsListner:
 
     @staticmethod
     def initiate_mqtt_connection():
-        broker_address = "iot.eclipse.org"  # "linksmart-dev.fit.fraunhofer.de"## "broker.mqttdashboard.com"  # use external broker
+        broker_address = "broker.mqttdashboard.com" #"iot.eclipse.org"  # "linksmart-dev.fit.fraunhofer.de"## "broker.mqttdashboard.com"  # use external broker
         GroupControllerMqttTopicsListner.publisher_GCKS = mqtt.Client("P3")  # create new instance
         GroupControllerMqttTopicsListner.publisher_GCKS.connect(broker_address)
         print("done")
@@ -123,12 +124,16 @@ class GroupControllerMqttTopicsListner:
 
 
     @staticmethod
-    def send_rekey_message(message, topic, encryption_key, random_sequence):
+    def send_rekey_message(message, topic, encryption_key, random_sequence, nonce_prefix_size=None,
+                           nonce_prefix_value=None):
         print(message)
         print(topic)
         if type(message) is dict:
             mqtt_message = dict()
             mqtt_message['key_sequence_number'] = random_sequence
+            #if nonce_prefix_value is not None:
+            mqtt_message['nonce_prefix_value'] = nonce_prefix_value
+            mqtt_message['nonce_prefix_size'] = nonce_prefix_size
             for key, value in message.items():
                 if key is 'publisher_public_key' and value is not None:
                     mqtt_message['publisher_public_key'] = value.encode(HexEncoder).decode()
@@ -167,7 +172,8 @@ class GroupControllerMqttTopicsListner:
         return random_sequence
 
     @staticmethod
-    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id, random_sequence):
+    def change_structure_message(ancestor_keys, new_rekey_topics, encryption_key, participant_id, group_id,
+                                 random_sequence, nonce_prefix_size, nonce_prefix_value):
         # set a common change structure type message topic
         publisher_public_key = None
         subscriber_public_key = None
@@ -196,7 +202,9 @@ class GroupControllerMqttTopicsListner:
                            'subscriber_private_key': subscriber_private_key,
                            'common_key': common_key,
                            'key_sequence_number': random_sequence},
-            'rekey_topics': new_rekey_topics
+            'rekey_topics': new_rekey_topics,
+            'nonce_prefix_size': nonce_prefix_size,
+            'nonce_prefix_value': nonce_prefix_value
         }
         data_sa_json = {"message": keys,
                         "topic": str(group_id) + "__" + "changeGroupStructure" + "/" + str(participant_id)}
@@ -247,6 +255,8 @@ class DataSA:
         self.leave_group_topic = None
         self.leave_group_confirmation_topic = None
         self.key_sequence_number = None
+        self.nonce_prefix_value = None
+        self.nonce_prefix_size = None
 
     @staticmethod
     def set_gcks_verify_key(gcks_verify_key):
@@ -341,9 +351,18 @@ class GroupController:
     def add_participant_lkh(group, participant, permissions):
         group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManager.add_or_delete_participant(group, participant, permissions, True, False)
-        # check again
-        # to get the exact tree
+
         group_tree_map = [x for x in KeyManager.group_tree_mapping_list if x.group.id == group.id][0]
+
+        # keeping unique nonce -fix
+        nonce_prefix_size = None
+        nonce_prefix_value = None
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            nonce_prefix_size = 0
+            nonce_prefix_value = -1
+            no_of_leaves = len(group_tree_map.root_tree_common.leaves)
+            nonce_prefix_size = math.ceil(math.log2(no_of_leaves))
+
         tree = Node(group.group_name)
         tree_type_name = ''
         if permissions is 1:
@@ -362,6 +381,9 @@ class GroupController:
 
         if result['tree_structure_change'] is False:
             for message in result['add_participant'][0]:
+                # for sequenctial nonce
+                #if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+                    #nonce_prefix_value += 1
                 update_msg_topic_name = str(group.id)+"__" + result['add_participant'][1]['tree_type'] + message[
                     'message_name']
                 # todo - nonce range logic
@@ -376,7 +398,8 @@ class GroupController:
                     message_to_bytes = message['changed_parent_key']'''
                 rekey_sa.changed_keys = ['changed_parent_key']
                 GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
-                                                                    message['encryption_key'], group.current_key_sequence_number)
+                                                                    message['encryption_key'],
+                                                                    group.current_key_sequence_number)
                 # time.sleep(2)
                 # rekey_message = MqttMesssageData(rekey_sa, update_msg_topic_name, message['encryption_key'])
                 # rekey_message.send_message()
@@ -389,7 +412,8 @@ class GroupController:
             leaves = tree.leaves
             for leaf in leaves:
                 if leaf.leaf_node.participant is not None and leaf.leaf_node.participant.participant_id is not participant.participant_id:
-
+                    if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+                        nonce_prefix_value += 1
                     ancestor_list = (findall_by_attr(tree, leaf.leaf_node.participant.participant_id))[0].ancestors
                     ancestor_keys, topic_to_sub_enc_keys = GroupController.__get_ancestors_and_keys(ancestor_list,
                                                                                                     group,
@@ -398,7 +422,10 @@ class GroupController:
                     GroupControllerMqttTopicsListner.change_structure_message(ancestor_keys, topic_to_sub_enc_keys,
                                                               leaf.leaf_node.participant.pairwise_key,
                                                               leaf.leaf_node.participant.participant_id, group.id,
-                                                              group.current_key_sequence_number)
+                                                              group.current_key_sequence_number, nonce_prefix_size,
+                                                                              nonce_prefix_value)
+                    # update the nonce prefix for the participant
+                    leaf.leaf_node.participant.nonce_prefix_value = nonce_prefix_value
 
         # update other trees where group keys changed
         for trees in result['update_tree']:
@@ -414,7 +441,18 @@ class GroupController:
                 GroupControllerMqttTopicsListner.send_rekey_message(message['changed_parent_key'], update_msg_topic_name,
                                                     message['encryption_key'], group.current_key_sequence_number)
                 # time.sleep(2)
-
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            if len(group.nonce_free_prefix_values) == 0:
+                leaves = tree.leaves
+                number_of_participants = -1
+                for leaf in leaves:
+                    if leaf.leaf_node.participant is not None:
+                        number_of_participants += 1
+                nonce_prefix_value = number_of_participants
+            else:
+                nonce_prefix_value = group.nonce_free_prefix_values[0]
+                del group.nonce_free_prefix_values[0]
+            participant.nonce_prefix_value = nonce_prefix_value
         # now return to registration DATA SA
         data_sa = DataSA(permissions, participant.pairwise_key, "LKH")
         # recheck
@@ -430,7 +468,6 @@ class GroupController:
         data_sa.key_management_type = KeyManagementProtocols.LKH.value
         data_sa.set_ancestor_keys(ancestor_keys)
         data_sa.set_group_keys(ancestor_keys[0]['key'])
-        data_sa.set_nonce_prefix(3) #-- todo
         data_sa.set_rekey_topics(topic_to_sub_enc_keys)
         data_sa.set_subscriptions(group.topics)
         data_sa.set_request_rekey_topic("request_group_keys_change/" + group.id + "/" + participant.participant_id)
@@ -443,16 +480,32 @@ class GroupController:
         data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
         data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/"+ group.id + "/" + participant.participant_id
         data_sa.key_sequence_number = group.current_key_sequence_number
+        data_sa.nonce_prefix_value = nonce_prefix_value
+        data_sa.nonce_prefix_size = nonce_prefix_size
         return data_sa
 
     @staticmethod
     def add_participant_gkmp(group, participant, permissions):
         group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManagerGKMP.add_or_delete_participant(group, participant, permissions, True, False)
+        gkmp_list_group = [x for x in KeyManagerGKMP.group_gkmp_mapping_list if x.group.id == group.id][0]
+
+        nonce_prefix_size = None
+        nonce_prefix_value = None
+
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            no_of_participants = len(gkmp_list_group.publishers_and_subscribers)
+            nonce_prefix_size = math.ceil(math.log2(no_of_participants))
+            nonce_prefix_size = 0
+            nonce_prefix_value = -1
+
 
         for message_data in result[0]:
+            if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+                nonce_prefix_value += 1
             GroupControllerMqttTopicsListner.send_rekey_message(message_data['changed_parent_key'], message_data['message_name'],
-                                                message_data['encryption_key'], group.current_key_sequence_number)
+                                                message_data['encryption_key'], group.current_key_sequence_number, nonce_prefix_size,
+                                                                nonce_prefix_value)
         participant_group_keys = result[1]
         # now return to registration DATA SA
         data_sa = DataSA(permissions, participant.pairwise_key, "GKMP")
@@ -466,6 +519,8 @@ class GroupController:
         else:
             pub_sub_grp_type = "sub"
 
+        nonce_prefix_value += 1
+
         data_sa.rekey_gkmp_topic = group.id + "__" + pub_sub_grp_type + "/gkmp_key_change/" + participant.participant_id
         data_sa.set_subscriptions(group.topics)
         data_sa.set_group_keys(participant_group_keys)
@@ -478,6 +533,8 @@ class GroupController:
         data_sa.leave_group_topic = "client_leave_group/" + group.id + "/" + participant.participant_id
         data_sa.leave_group_confirmation_topic = "client_leave_group_confirmation/" + group.id + "/" + participant.participant_id
         data_sa.key_sequence_number = group.current_key_sequence_number
+        data_sa.nonce_prefix_value = nonce_prefix_value
+        data_sa.nonce_prefix_size = nonce_prefix_size
         return data_sa
 
 
@@ -485,6 +542,10 @@ class GroupController:
     def delete_participant_lkh(group, participant, permissions):
         group.current_key_sequence_number = random.randint(1, 100000)
         result = KeyManager.add_or_delete_participant(group, participant, permissions, False, True)
+
+        # for nonce value in lkh type
+        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
+            group.nonce_free_prefix_values.append(participant.nonce_prefix_value)
 
         for message in result['delete_participant'][0]:
             update_msg_topic_name = str(group.id) + "__" + result['delete_participant'][1]['tree_type'] + message[

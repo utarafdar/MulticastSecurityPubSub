@@ -7,6 +7,7 @@ class Participant:
         self.participant_id = participant_id
         self.groups = []
         self.group_id_user_permissions_dict = {}
+        self.nonce_prefix_value = None
 
     def add_group(self, group, participant_permissions):
         # need to include logic for tree arrays

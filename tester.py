@@ -219,3 +219,6 @@ print(list(dict1.keys())[0])
 key = list(dict1.keys())[0]
 del dict1[key]
 print(dict1)
+
+for type in TypeOfPubSubGroupEnum:
+    print(type.name)

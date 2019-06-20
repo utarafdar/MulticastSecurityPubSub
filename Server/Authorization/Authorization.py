@@ -13,6 +13,7 @@ class Authorization:
                      type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
         group = Group(group_name, group_id, type_of_pub_sub_group, type_of_key_management_protocol)
         Authorization.groups.append(group)
+        print(group.group_name)
         if type_of_key_management_protocol is KeyManagementProtocols.GKMP.value:
             KeyManagerGKMP.set_up_gkmp_group(group)
         if type_of_key_management_protocol is KeyManagementProtocols.LKH.value:
@@ -22,14 +23,10 @@ class Authorization:
         return group
 
     @staticmethod
-    def authorization_permissions(participant, group_id):
+    def authorization_permissions(participant, group_id, permission):
         group = [x for x in Authorization.groups if x.id == group_id][0]
-        permission = random.randint(1, 3)
-        if permission == 2:
-            permission = permission-1
-        if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
-            permission = 3
-        return permission, participant, group
+        # check if permissions possible, auth infrastructure
+        return True, participant, group
 
     @staticmethod
     def initializer():

@@ -496,7 +496,7 @@ class GroupController:
         if group.type_of_pub_sub_group is TypeOfPubSubGroupEnum.ALL_PUBSUB.value:
             no_of_participants = len(gkmp_list_group.publishers_and_subscribers)
             nonce_prefix_size = math.ceil(math.log2(no_of_participants))
-            nonce_prefix_size = 0
+            #nonce_prefix_size = 0
             nonce_prefix_value = -1
 
 

@@ -248,4 +248,5 @@ encrypted = box.encrypt(message, final_nonce)
 print (box.decrypt(encrypted))
 test = '00000000'
 
-print(len(bin(10)[2:]))
+print(len(bin(1)[2:]))
+print(bin(1)[2:])

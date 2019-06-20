@@ -29,15 +29,24 @@ def threaded(conn):
         data = conn.recv(1024)
         if not data:
             break
+        # for group and permissions authorization
+        data_rec = json.loads(data.decode('utf-8'))
+
         # participant = pickle.loads(data)
         group_id = "123"
         # generate participant Id and pairwise key
         participant_id = str(uuid.uuid4())
         pairwise_key = generate_key()
         participant = Participant(pairwise_key, participant_id)
+        permission = data_rec['permissions']
+        permission = int(permission)
+        results = Authorization.authorization_permissions(participant, data_rec['group_name'], permission)
+        #permission = results[0]
+        # check from auth infra if permissions allowed
+        if results[0] is False:
+            # send message invalid permissions
+            pass
 
-        results = Authorization.authorization_permissions(participant, group_id)
-        permission = results[0]
         group = results[2]
         # cannot decide this here add lkh or gkmp-- todo
         data_sa = None

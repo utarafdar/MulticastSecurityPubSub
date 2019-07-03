@@ -1,0 +1,6 @@
+{
+  "add_participant_time": "True",
+  "rekey_time": "True",
+  "rekey_message_size": "True",
+  "number_of_rekey_messages_sent": "True"
+}

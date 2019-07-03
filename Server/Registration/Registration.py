@@ -13,11 +13,18 @@ import nacl.utils
 import nacl.secret
 import json
 import uuid
+import timeit
 import os
-import re
 from nacl.encoding import HexEncoder
 
 print_lock = threading.Lock()
+
+evaluation_flags = dict()
+
+start = None
+
+file_header_flag = True
+
 
 def generate_key():
     return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
@@ -65,13 +72,23 @@ def threaded(conn):
         # convert data sa to json
         # serialize it
         data = __convert_data_sa_to_json(data_sa, group.type_of_key_management_protocol)
-        # todo -- store the participant id and permissions --
-        print("group participants")
-        print(group.participants_permissions[participant])
+
+        if evaluation_flags['add_participant_time'] == "True":
+            stop = timeit.default_timer()
+            absolute_path = os.path.dirname(__file__)
+            file_name = os.path.join(absolute_path, '../Evaluation/logs/add_participant_time_'+
+                                     str(group.type_of_key_management_protocol)+ '_'+str(data['type_of_group'])
+                                     +'.txt')
+            f = open(file_name, "a+")
+            f.write(str(stop - start) + "\n")
+            f.close()
+
+        # print("group participants")
+        # print(group.participants_permissions[participant])
 
         conn.sendall(json.dumps(data).encode())
         #conn.sendall(pickle.dumps(data_sa))
-        # print_lock.release()
+        # # print_lock.release()
         conn.close()
         break
 
@@ -95,6 +112,15 @@ def get_ip_address():
 
 
 def Main():
+
+    #evaluation
+    absolute_path = os.path.dirname(__file__)
+    file_name = os.path.join(absolute_path, '../Evaluation/EvaluationFlags.json')
+    global evaluation_flags
+    with open(file_name, 'r') as f:
+        evaluation_flags = json.load(f)
+        GroupController.evaluation_flags = evaluation_flags
+
     # host = '172.16.1.101'
     # host = socket.gethostbyname(socket.getfqdn())
     host = get_ip_address()
@@ -104,24 +130,30 @@ def Main():
     port = 65431
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
-    # print("socket binded to post", port)
+    # # print("socket binded to post", port)
 
     # put the socket into listening mode
     s.listen(5)
-    print("socket is listening")
+    # print("socket is listening")
     # initialize
     start_new_thread(initializer, ())
     start_new_thread(initialize_group_controller, ())
 
     # a forever loop until client wants to exit
+
     while True:
         # establish connection with client
         c, addr = s.accept()
 
         # lock acquired by client
 
-        # print_lock.acquire()
-        print('Connected to :', addr[0], ':', addr[1])
+        # # print_lock.acquire()
+        ## print('Connected to :', addr[0], ':', addr[1])
+
+        # evaluation
+        if evaluation_flags['add_participant_time'] == "True":
+            global start
+            start = timeit.default_timer()
 
         # Start a new thread and return its identifier
         start_new_thread(threaded, (c,))

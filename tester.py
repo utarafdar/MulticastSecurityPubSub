@@ -222,3 +222,7 @@ print(dict1)
 
 for type in TypeOfPubSubGroupEnum:
     print(type.name)
+if '3' in dict1:
+    print("yes")
+print('2' in dict1)
+print('5' in dict1)

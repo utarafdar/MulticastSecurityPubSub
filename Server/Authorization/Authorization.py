@@ -13,7 +13,7 @@ class Authorization:
                      type_of_pub_sub_group=TypeOfPubSubGroupEnum.ALL_PUBSUB):
         group = Group(group_name, group_id, type_of_pub_sub_group, type_of_key_management_protocol)
         Authorization.groups.append(group)
-        print(group.group_name)
+        # print(group.group_name)
         if type_of_key_management_protocol is KeyManagementProtocols.GKMP.value:
             KeyManagerGKMP.set_up_gkmp_group(group)
         if type_of_key_management_protocol is KeyManagementProtocols.LKH.value:

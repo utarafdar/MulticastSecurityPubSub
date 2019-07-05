@@ -89,7 +89,7 @@ class GroupControllerMqttTopicsListner:
 
     @staticmethod
     def initiate_mqtt_connection():
-        broker_address = "broker.mqttdashboard.com" #"iot.eclipse.org"  # "linksmart-dev.fit.fraunhofer.de"## "broker.mqttdashboard.com"  # use external broker
+        broker_address = "iot.eclipse.org"#"broker.mqttdashboard.com" #  # "linksmart-dev.fit.fraunhofer.de"## "broker.mqttdashboard.com"  # use external broker
         GroupControllerMqttTopicsListner.publisher_GCKS = mqtt.Client("P3")  # create new instance
         GroupControllerMqttTopicsListner.publisher_GCKS.connect(broker_address)
         # print("done")

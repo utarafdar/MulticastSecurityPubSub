@@ -25,7 +25,7 @@ class Initializer:
                                                    type_of_pub_sub_group=type_of_group.value)
                 topic = Topic(topic_name)
                 group.add_topic(topic)
-                # print(group_name)
+                print(group_name)
 
         '''group = Authorization.create_group("testGroup", "123", type_of_key_management_protocol=2, type_of_pub_sub_group=4)
         print(group)
